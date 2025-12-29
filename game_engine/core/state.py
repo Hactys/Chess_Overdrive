@@ -1,5 +1,9 @@
 from dataclasses import dataclass, field
 from typing import Dict, List
+
+from game_engine.cards.base_card import CardInstance
+from game_engine.effects.base_effect import EffectInstance
+from game_engine.traps.base_trap import TrapInstance
 from .board import Board
 from .rng import RNG
 from .events import GameEvent
