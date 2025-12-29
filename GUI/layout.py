@@ -11,6 +11,7 @@ from components.info_panel import info_panel
 def build_layout():
     return dbc.Container([
         dcc.Store(id="game_state_store"),
+        dcc.Store(id="available_moves_store", data=[]),
 
         html.H1("Chess Overdrive", className="text-center mt-3 mb-4"),
 
@@ -24,5 +25,5 @@ def build_layout():
             ], width=6),
         ]),
 
-        dcc.Interval(id="state_poll", interval=200, n_intervals=0),
+        dcc.Interval(id="state_poll", interval=100, n_intervals=0),
     ], fluid=True)
