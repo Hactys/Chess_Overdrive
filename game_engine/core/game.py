@@ -4,6 +4,20 @@ from game_engine.core.state import GameState, PlayerID
 from game_engine.core.event_bus import EventBus
 from game_engine.core.events import TurnStartEvent, TurnEndEvent
 from game_engine.actions.base_action import BaseAction
+from game_engine.rules.chess_movement import MOVE_RULES
+
+
+def get_moves_for_piece(state, from_pos):
+    piece = state.board.get_piece(from_pos)
+    if not piece: 
+        return []
+    
+    moves=[]
+    for rule in MOVE_RULES:
+        moves += rule.generate(state, from_pos, piece)
+    for rule in MOVE_RULES:
+        moves = rule.modify(state, from_pos, piece, moves)
+    return list(set(moves))
 
 
 class Game:
@@ -70,3 +84,15 @@ class Game:
 
     def get_turn(self) -> int:
         return self.state.turn
+    
+    def get_legal_moves(self, player_id: str, from_pos: str) -> list[str]:
+        """Renvoie tous les mouvements autorisés par les règles."""
+        piece = self.state.board.get_piece(from_pos)
+        if not piece or piece.owner != player_id:
+            return []
+
+        moves = []
+        moves = get_moves_for_piece(self.state, from_pos)
+
+        # TODO : on pourrait aussi filtrer les cases mettant son roi en échec pour les éviter
+        return moves
