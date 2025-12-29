@@ -49,5 +49,17 @@ def handle_action(data):
         socketio.emit("error", {"msg": "Invalid action"}, room=request.sid)
 
 
+@socketio.on("get_legal_moves")
+def ws_legal_moves(data):
+    game_id = data["game_id"]
+    pos = data["from"]
+    player = data.get("player", "white")
+
+    game = manager.get_game(game_id)
+    moves = game.get_legal_moves(player, pos)
+
+    emit("legal_moves_result", {"from": pos, "moves": moves}, room=game_id)  # type: ignore
+
+
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5000, debug=True)
