@@ -37,7 +37,6 @@ def join_game(data):
 
 @socketio.on("action")
 def handle_action(data):
-    print(f"In action, data : {data}")
     game_id = data["game_id"]
     game = manager.get_game(game_id)
 
