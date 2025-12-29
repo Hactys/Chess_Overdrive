@@ -32,7 +32,7 @@ def join_game(data):
     join_room(game_id)
 
     game = manager.get_game(game_id)
-    emit("state", state_to_dict(game.state), room=game_id)
+    emit("state", state_to_dict(game.state), room=game_id)  # type: ignore
 
 
 @socketio.on("action")
@@ -44,9 +44,9 @@ def handle_action(data):
     action = parse_action(data["action"])
 
     if game.apply_action(action):
-        socketio.emit("state", state_to_dict(game.state), room=game_id)
+        socketio.emit("state", state_to_dict(game.state), room=game_id)  # type: ignore
     else:
-        socketio.emit("error", {"msg": "Invalid action"}, room=request.sid)
+        socketio.emit("error", {"msg": "Invalid action"}, room=request.sid)  # type: ignore
 
 
 @socketio.on("get_legal_moves")

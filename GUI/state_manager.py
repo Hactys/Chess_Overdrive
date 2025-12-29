@@ -28,7 +28,7 @@ def init_network(app):
         sio.emit("join", {"game_id": GAME_ID, "player": PLAYER})
         print("[WS] Connected")
 
-    @sio.on("state")
+    @sio.on("state")  # type: ignore
     def receive_state(data):
         global latest_state, new_state_available
         latest_state = data
