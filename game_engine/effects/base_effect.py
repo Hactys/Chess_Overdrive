@@ -5,6 +5,7 @@ from game_engine.core.state import GameState
 
 class EffectInstance(ABC):
     effect_id: str
+    target_id: str
     expires_at_turn: int
 
     def on_event(self, event: GameEvent, state: GameState) -> None:
