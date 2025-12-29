@@ -1,6 +1,106 @@
-from typing import List
+from typing import List, Protocol
 from game_engine.core.state import GameState
-from game_engine.core.board import Square, pos_to_coords
+from game_engine.core.board import Square, pos_to_coords, coords_to_pos
+from game_engine.core.board import Piece
+
+
+class MoveRule(Protocol):
+    """Interface pour TOUTES les règles de déplacement.
+      Chaque règle peut ajouter, filtrer ou modifier des déplacements.
+    """
+    def generate(self, state: GameState, from_pos: Square, piece: Piece) -> List[Square]:
+        return []
+
+    def modify(self, state: GameState, from_pos: Square, piece: Piece, moves: List[Square]) -> List[Square]:
+        return moves
+
+
+class ChessMovementRule(MoveRule):  # mouvements classiques d'échecs
+    def generate(self, state, from_pos, piece):
+        moves = []
+        board = state.board
+        fx, fy = pos_to_coords(from_pos)
+
+        def add(dx,dy,repeat=False):
+            cx, cy = fx+dx, fy+dy
+            while board.is_inside(pos:=coords_to_pos(cx,cy)):
+                target = board.get_piece(pos)
+                if target:
+                    if target.owner != piece.owner:
+                        moves.append(pos)
+                    break
+                moves.append(pos)
+                if not repeat: 
+                    break
+                cx += dx
+                cy += dy
+
+        p=piece.piece_type.lower()
+        if p == "pawn":
+            direction = 1 if piece.owner=="white" else -1
+            forward = coords_to_pos(fx, fy+direction)
+            if board.is_inside(forward) and not board.get_piece(forward):
+                moves.append(forward)
+            for dx in (-1,1):
+                cap = coords_to_pos(fx+dx, fy+direction)
+                if board.is_inside(cap):
+                    t = board.get_piece(cap)
+                    if t and t.owner!=piece.owner:
+                        moves.append(cap)
+
+        if p=="rook":   
+            add(1,0,True)
+            add(-1,0,True)
+            add(0,1,True)
+            add(0,-1,True)
+        if p=="bishop": 
+            add(1,1,True)
+            add(1,-1,True)
+            add(-1,1,True)
+            add(-1,-1,True)
+        if p=="queen":
+            add(1,0,True)
+            add(-1,0,True)
+            add(0,1,True)
+            add(0,-1,True)
+            add(1,1,True)
+            add(1,-1,True)
+            add(-1,1,True)
+            add(-1,-1,True)
+        if p=="king":
+            for dx in (-1,0,1):
+                for dy in (-1,0,1):
+                    if dx or dy:
+                        add(dx,dy)
+        if p=="knight":
+            for dx,dy in [(2,1),(2,-1),(-2,1),(-2,-1),(1,2),(1,-2),(-1,2),(-1,-2)]:
+                add(dx,dy)
+
+        return moves
+
+
+class SpectralRule(MoveRule):
+    """une pièce Spectrale ignore les collisions MAIS ne capture pas."""
+
+    def modify(self,state,from_pos,piece,moves):
+        if not any(e.effect_id=="spectral" and e.target_id==piece.piece_id for e in state.active_effects):
+            return moves
+
+        final=[]
+        for m in moves:
+            t = state.board.get_piece(m)
+            if t is None:  # peut traverser et se poser
+                final.append(m)
+            #  capture interdite -> on ne garde pas les cases avec cible
+        return final
+
+
+
+# Garder ça après les class de règles.
+MOVE_RULES: List[MoveRule] = [
+    ChessMovementRule(),
+    SpectralRule(),      # autres règles se plug ici
+]
 
 
 def is_legal_move(state: GameState, from_pos: Square, to_pos: Square) -> bool:
