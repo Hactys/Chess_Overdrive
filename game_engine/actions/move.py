@@ -58,7 +58,7 @@ class MoveAction(BaseAction):
 
         # Path check
         path: List[Square] = get_path(self.from_pos, self.to_pos)
-        path_event = PathCheckEvent(path=path)  # type: ignore
+        path_event = PathCheckEvent(path=path)
         event_bus.emit(path_event, state)
         if path_event.cancelled:
             return
@@ -71,7 +71,7 @@ class MoveAction(BaseAction):
         landed_event = PieceLandedEvent(
             position=self.to_pos,
             piece_id=piece.piece_id
-        )  # type: ignore
+        )
         event_bus.emit(landed_event, state)
 
         # Combat éventuel
