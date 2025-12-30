@@ -40,7 +40,7 @@ class MoveAction(BaseAction):
         if piece is None:
             raise RuntimeError("Invalid MoveAction execution")
 
-        event_bus = state.event_bus  # TODO : à injecter par Game
+        event_bus = state.event_bus
 
         # Move attempt
         move_event = MoveAttemptEvent(
