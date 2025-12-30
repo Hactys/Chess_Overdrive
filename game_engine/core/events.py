@@ -40,6 +40,16 @@ class PieceLandedEvent(GameEvent):
     piece_id: str = ""
 
 
+@dataclass
+class MovesGenerateEvent(GameEvent):
+    """
+    Étape 1 : génération brute des coups possibles
+    """
+    from_pos: str = ""
+    piece_id: str = ""
+    moves: list[str] = field(default_factory=list)
+
+
 # COMBAT
 
 @dataclass

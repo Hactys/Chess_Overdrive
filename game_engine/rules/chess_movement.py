@@ -2,6 +2,7 @@ from typing import List, Protocol
 from game_engine.core.state import GameState
 from game_engine.core.board import Square, pos_to_coords, coords_to_pos
 from game_engine.core.board import Piece
+from game_engine.core.events import MovesGenerateEvent
 
 
 class MoveRule(Protocol):
@@ -10,9 +11,10 @@ class MoveRule(Protocol):
     """
     def generate(self, state: GameState, from_pos: Square, piece: Piece) -> List[Square]:
         return []
+    
+    def on_generate(self, event: MovesGenerateEvent, state: GameState):
+        return
 
-    def modify(self, state: GameState, from_pos: Square, piece: Piece, moves: List[Square]) -> List[Square]:
-        return moves
 
 
 class ChessMovementRule(MoveRule):  # mouvements classiques d'échecs
@@ -77,22 +79,59 @@ class ChessMovementRule(MoveRule):  # mouvements classiques d'échecs
                 add(dx,dy)
 
         return moves
+    
+    def on_generate(self, event: MovesGenerateEvent, state: GameState):
+        piece = state.board.get_piece(event.from_pos)
+        if not piece or piece.piece_id != event.piece_id:
+            return
+
+        moves = self.generate(state, event.from_pos, piece)
+        event.moves.extend(moves)
 
 
 class SpectralRule(MoveRule):
     """une pièce Spectrale ignore les collisions MAIS ne capture pas."""
+    def on_generate(self, event: MovesGenerateEvent, state: GameState):
+        piece = state.board.get_piece(event.from_pos)
+        if not piece or piece.piece_id != event.piece_id:
+            return
 
-    def modify(self,state,from_pos,piece,moves):
-        if not any(e.effect_id=="spectral" and e.target_id==piece.piece_id for e in state.active_effects):
-            return moves
+        if not any(e.effect_id == "spectral" and e.target_id == piece.piece_id 
+                   for e in state.active_effects):
+            return
 
-        final=[]
-        for m in moves:
-            t = state.board.get_piece(m)
-            if t is None:  # peut traverser et se poser
-                final.append(m)
-            #  capture interdite -> on ne garde pas les cases avec cible
-        return final
+        moves = []
+        board = state.board
+        fx, fy = pos_to_coords(event.from_pos)
+
+        def add(dx,dy):
+            cx, cy = fx+dx, fy+dy
+            while board.is_inside(pos:=coords_to_pos(cx,cy)):
+                target = board.get_piece(pos)
+                if target is None :
+                    moves.append(pos)
+                cx += dx
+                cy += dy
+
+        p = piece.piece_type.lower()
+        if p=="rook":   
+            add(1,0)
+            add(-1,0)
+            add(0,1)
+            add(0,-1)
+        elif p=="bishop": 
+            add(1,1)
+            add(1,-1)
+            add(-1,1)
+            add(-1,-1)
+        elif p=="queen":
+            add(1,0); add(-1,0)
+            add(0,1); add(0,-1)
+            add(1,1); add(1,-1)
+            add(-1,1); add(-1,-1)
+        else:
+            return
+        event.moves[:] = moves
 
 
 

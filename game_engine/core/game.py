@@ -2,9 +2,9 @@ from typing import List
 
 from game_engine.core.state import GameState, PlayerID
 from game_engine.core.event_bus import EventBus
-from game_engine.core.events import TurnStartEvent, TurnEndEvent
+from game_engine.core.events import MovesGenerateEvent, TurnStartEvent, TurnEndEvent
 from game_engine.actions.base_action import BaseAction
-from game_engine.rules.chess_movement import MOVE_RULES
+from game_engine.rules.chess_movement import MOVE_RULES, ChessMovementRule, SpectralRule
 
 
 def get_moves_for_piece(state, from_pos):
@@ -15,8 +15,6 @@ def get_moves_for_piece(state, from_pos):
     moves=[]
     for rule in MOVE_RULES:
         moves += rule.generate(state, from_pos, piece)
-    for rule in MOVE_RULES:
-        moves = rule.modify(state, from_pos, piece, moves)
     return list(set(moves))
 
 
@@ -40,6 +38,13 @@ class Game:
             raise ValueError("current_player must be in player_order")
 
         self.state.event_bus = event_bus  # Injection du bus dans l'état (choix volontaire)
+        self.register_move_rules()
+    
+    def register_move_rules(self):
+        bus = self.event_bus
+        bus.subscribe(MovesGenerateEvent, ChessMovementRule().on_generate, priority=0) # type: ignore
+        bus.subscribe(MovesGenerateEvent, SpectralRule().on_generate, priority=-10) # type: ignore
+
 
     def start_turn(self) -> None:
         """
@@ -92,7 +97,12 @@ class Game:
             return []
 
         moves = []
-        moves = get_moves_for_piece(self.state, from_pos)
+        gen_event = MovesGenerateEvent(
+            from_pos=from_pos,
+            piece_id=piece.piece_id,
+        )
+        self.event_bus.emit(gen_event, self.state)
+        moves = list(set(gen_event.moves))
 
         # TODO : on pourrait aussi filtrer les cases mettant son roi en échec pour les éviter
         return moves
