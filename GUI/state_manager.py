@@ -10,7 +10,7 @@ sio = socketio.Client()
 
 latest_state = None
 new_state_available = False
-legal_moves_cache = []
+legal_moves_cache = None
 new_legal_moves = False
 
 def init_network(app):
@@ -40,8 +40,6 @@ def init_network(app):
         global legal_moves_cache, new_legal_moves
         legal_moves_cache = data["moves"]
         new_legal_moves = True
-        print("[WS] Legal moves:", legal_moves_cache)
-
 
     sio.connect(WS_URL, transports=["websocket", "polling"], namespaces=["/"])
 
@@ -57,7 +55,7 @@ def pull_state():
 def pull_moves():
     """Appelé en polling pour mise à jour Dash"""
     global new_legal_moves
-    if new_legal_moves and legal_moves_cache:
+    if new_legal_moves and legal_moves_cache is not None:
         new_legal_moves = False
         return legal_moves_cache
     return no_update
