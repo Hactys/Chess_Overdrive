@@ -1,6 +1,9 @@
 from abc import ABC
+from typing import TYPE_CHECKING
 from game_engine.core.events import GameEvent
-from game_engine.core.state import GameState
+
+if TYPE_CHECKING:
+    from game_engine.core.state import GameState  
 
 
 class TrapInstance(ABC):

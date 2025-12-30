@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
-from game_engine.core.state import GameState
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from game_engine.core.state import GameState  
 
 
 class CardInstance:
