@@ -78,10 +78,10 @@ class Game:
         Retourne True si l'action a été exécutée,
         False si elle est invalide.
         """
-        if not action.validate(self.state):
+        if not action.validate(self):
             return False
 
-        action.execute(self.state)
+        action.execute(self)
         return True
 
     def get_current_player(self) -> PlayerID:

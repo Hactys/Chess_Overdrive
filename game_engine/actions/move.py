@@ -1,6 +1,5 @@
 from typing import List
 
-from game_engine.core.state import GameState
 from game_engine.core.board import Square
 from game_engine.core.events import (MoveAttemptEvent, PathCheckEvent, PieceLandedEvent, 
                                      CombatCalculateEvent, CombatResolvedEvent)
@@ -15,7 +14,8 @@ class MoveAction(BaseAction):
         self.from_pos = from_pos
         self.to_pos = to_pos
 
-    def validate(self, state: GameState) -> bool:
+    def validate(self, game: Game) -> bool:
+        state = game.state
         board = state.board
         piece = board.get_piece(self.from_pos)
 
@@ -27,13 +27,14 @@ class MoveAction(BaseAction):
             return False
         return True
 
-    def execute(self, state: GameState) -> None:
+    def execute(self, game: Game) -> None:
         """
         Pipeline pour le déroulement de l'execution d'une action de mouvement.
         
         :param state: Current state of the game
         :type state: GameState
         """
+        state = game.state
         board = state.board
         piece = board.get_piece(self.from_pos)
 
@@ -115,5 +116,9 @@ class MoveAction(BaseAction):
                 board.set_piece(self.to_pos, attacker)
             else:  # Attaquant détruit
                 board.remove_piece(self.to_pos)
+
+        # Passage au tour de l'adversaire
+        game.end_turn()
+
 
         # Fin de l’action

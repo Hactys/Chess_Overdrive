@@ -1,5 +1,8 @@
+from typing import TYPE_CHECKING
 from abc import ABC, abstractmethod
-from game_engine.core.state import GameState
+
+if TYPE_CHECKING:
+    from game_engine.core.game import Game
 
 
 class BaseAction(ABC):
@@ -8,7 +11,7 @@ class BaseAction(ABC):
     Toute interaction joueur → moteur passe par une Action.
     """
     @abstractmethod
-    def validate(self, state: GameState) -> bool:
+    def validate(self, game: Game) -> bool:
         """
         Vérifie si l'action est autorisée dans l'état courant.
         Ne modifie PAS l'état.
@@ -16,7 +19,7 @@ class BaseAction(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def execute(self, state: GameState) -> None:
+    def execute(self, game: Game) -> None:
         """
         Applique l'action à l'état du jeu.
         Peut émettre des événements.

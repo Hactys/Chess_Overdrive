@@ -1,4 +1,4 @@
-from game_engine.core.state import GameState
+from game_engine.core.game import Game
 from game_engine.actions.base_action import BaseAction
 
 
@@ -9,8 +9,8 @@ class NoAction(BaseAction):
     def __init__(self):
         return
 
-    def validate(self, state: GameState) -> bool:
+    def validate(self, game: Game) -> bool:
         return True
 
-    def execute(self, state: GameState) -> None:
+    def execute(self, game: Game) -> None:
         return
