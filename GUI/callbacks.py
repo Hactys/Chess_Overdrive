@@ -24,6 +24,10 @@ def register_callbacks(app):
     def display_board(state, legal_moves):
         highlighted = set(legal_moves) if ctx.triggered[0]['prop_id'] != "game_state_store.data" else set()
         if not state:
+            sio.emit("action",{
+                "game_id":"test_game",
+                "action":{"type":"no action"}
+            })
             return [""]*64
         mapping = dict(render_board(state))
         return [html.Span(
