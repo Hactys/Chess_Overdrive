@@ -47,7 +47,7 @@ class MoveAction(BaseAction):
             from_pos=self.from_pos,
             to_pos=self.to_pos,
             piece_id=piece.piece_id
-        )  # type: ignore
+        )
         event_bus.emit(move_event, state)
         if move_event.cancelled:
             return
