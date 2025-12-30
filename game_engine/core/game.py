@@ -60,8 +60,9 @@ class Game:
         event = TurnEndEvent(player_id=self.state.current_player)  # type: ignore
         self.event_bus.emit(event, self.state)
 
-        self._rotate_player()
         self.state.next_turn()
+        self._rotate_player()
+        self.start_turn()
 
     def _rotate_player(self) -> None:
         """

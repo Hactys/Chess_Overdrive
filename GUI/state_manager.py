@@ -50,7 +50,7 @@ def pull_state():
     if new_state_available and latest_state:
         new_state_available = False
         return latest_state
-    return no_update
+    return None
 
 def pull_moves():
     """Appelé en polling pour mise à jour Dash"""
@@ -58,4 +58,4 @@ def pull_moves():
     if new_legal_moves and legal_moves_cache is not None:
         new_legal_moves = False
         return legal_moves_cache
-    return no_update
+    return None

@@ -1,5 +1,5 @@
 import requests
-from dash import Input, Output, State, html, ctx
+from dash import Input, Output, State, html, ctx, no_update
 from state_manager import pull_state, pull_moves, sio
 from board_renderer import render_board
 
@@ -12,12 +12,13 @@ def register_callbacks(app):
         Input("state_poll","n_intervals")
     )
     def refresh_state(_):
-        return pull_state(), pull_moves()
+        state = pull_state()
+        moves = pull_moves()
+        return state if state is not None else no_update, moves if moves is not None else no_update
 
     # Update board when state changes
     @app.callback(
-        [Output(f"square-{f}{r}","children")
-         for r in range(8,0,-1) for f in "abcdefgh"],
+        [Output(f"square-{f}{r}","children") for r in range(8,0,-1) for f in "abcdefgh"],
         Input("game_state_store", "data"),
         Input("available_moves_store", "data")
     )
@@ -47,7 +48,7 @@ def register_callbacks(app):
         prevent_initial_call=True
     )
     def handle_click(*args):
-        state = args[-1]
+        state = args[-2]
         clicks = args[:-2]
         available_moves = args[-1]
 
@@ -58,18 +59,20 @@ def register_callbacks(app):
 
         pos = ctx.triggered[0]['prop_id'].split('-')[1].split('.')[0]  # type: ignore
 
+        current_player = state["current_player"] if state is not None else "white"
+
         if not selected["from"]:
             sio.emit("get_legal_moves", {
                 "game_id":"test_game",
                 "from": pos,
-                "player":"white"
+                "player": current_player
             })
             selected["from"]=pos
         elif pos not in available_moves:
             sio.emit("get_legal_moves", {
                 "game_id":"test_game",
                 "from": pos,
-                "player":"white"
+                "player": current_player
             })
             selected["from"]=pos
         else:
