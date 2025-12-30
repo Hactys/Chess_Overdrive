@@ -22,7 +22,7 @@ def init_network(app):
         })
         print("[API] Game created")
     except:
-        print("[API] Game exists or unreachable")
+        print("[API] Engine unreachable")
 
     @sio.event
     def connect():
