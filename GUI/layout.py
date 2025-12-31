@@ -10,6 +10,8 @@ from components.info_panel import info_panel
 
 def build_layout():
     return dbc.Container([
+        dcc.Interval(id="state_poll", interval=1/30, n_intervals=0),  # 30 Hz
+        dcc.Store(id="game_id", data="test_game"),  # TODO : change this to get the real game_id
         dcc.Store(id="game_state_store"),
         dcc.Store(id="available_moves_store", data=[]),
 
@@ -24,6 +26,4 @@ def build_layout():
                 info_panel()
             ], width=6),
         ]),
-
-        dcc.Interval(id="state_poll", interval=100, n_intervals=0),
     ], fluid=True)

@@ -1,10 +1,11 @@
 import socketio, requests
-from dash import no_update
+
 
 SERVER_URL = "http://localhost:5000"
 WS_URL = "http://localhost:5000"
 GAME_ID = "test_game"
 PLAYER = "white"
+sio_connected = False
 
 sio = socketio.Client()
 
@@ -13,8 +14,13 @@ new_state_available = False
 legal_moves_cache = None
 new_legal_moves = False
 
+
 def init_network(app):
     """Démarre la connexion serveur + crée la partie par défaut"""
+    global sio_connected
+    if sio_connected:
+        print("[WS] Socket.IO already connected, skipping connection")
+        return
     try:
         requests.post(f"{SERVER_URL}/create", json={
             "game_id": GAME_ID,
@@ -42,6 +48,7 @@ def init_network(app):
         new_legal_moves = True
 
     sio.connect(WS_URL, transports=["websocket", "polling"], namespaces=["/"])
+    sio_connected = True
 
 
 def pull_state():

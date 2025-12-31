@@ -1,0 +1,3 @@
+.board-square:hover img {
+    transform: scale(1.175);
+}

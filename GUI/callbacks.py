@@ -7,9 +7,9 @@ from board_renderer import render_board
 def register_callbacks(app):
     # Update store from server
     @app.callback(
-        Output("game_state_store","data"),
-        Output("available_moves_store","data"),
-        Input("state_poll","n_intervals")
+        Output("game_state_store", "data"),
+        Output("available_moves_store", "data"),
+        Input("state_poll", "n_intervals"),
     )
     def refresh_state(_):
         state = pull_state()
