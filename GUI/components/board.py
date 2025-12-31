@@ -20,7 +20,7 @@ def board_component():
                     "alignItems":"center","justifyContent":"center",
                     "background":base_color,
                     "border":"1px solid #111",
-                    "cursor":"pointer","fontSize":"24px",
+                    "cursor":"pointer",
                     "transition":"0.15s"
                 }
             ))
