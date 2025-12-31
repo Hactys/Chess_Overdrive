@@ -115,7 +115,7 @@ class MoveAction(BaseAction):
                 board.remove_piece(self.to_pos)
                 board.set_piece(self.to_pos, attacker)
             else:  # Attaquant détruit
-                board.remove_piece(self.to_pos)
+                board.remove_piece(self.from_pos)
 
         # Passage au tour de l'adversaire
         game.end_turn()
