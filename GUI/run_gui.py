@@ -16,4 +16,4 @@ register_callbacks(app)
 
 if __name__ == "__main__":
     init_network(app)          # lance WebSocket client & auto create game
-    app.run(port=8050, debug=True)
+    app.run(port=8050, debug=True, use_reloader=False)

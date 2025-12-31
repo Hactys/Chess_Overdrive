@@ -1,3 +1,5 @@
+import traceback
+import threading
 import socketio, requests
 
 
@@ -46,7 +48,7 @@ def init_network(app):
             new_state_available = True
 
     @sio.on("legal_moves_result")  # type: ignore
-    def on_legal_moves(data):
+    def on_legal_moves(data):  # TODO : fix issue : here double call, i need to find why
         global legal_moves_cache, new_legal_moves
         with lock:
             legal_moves_cache = data["moves"]
