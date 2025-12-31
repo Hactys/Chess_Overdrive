@@ -61,6 +61,12 @@ class Board:
         if not self.is_inside(square):
             return None
         return self._grid.get(square)
+    
+    def get_square(self, piece_id: str) -> Square:
+        for square, piece in self._grid.items():
+            if piece is not None and piece.piece_id == piece_id:
+                return square
+        raise ValueError(f"'{piece_id}' not on the board")
 
     def set_piece(self, square: Square, piece: Optional[Piece]) -> None:
         if not self.is_inside(square):

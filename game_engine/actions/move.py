@@ -1,11 +1,10 @@
 from typing import List
 
 from game_engine.core.board import Square
-from game_engine.core.events import (MoveAttemptEvent, PathCheckEvent, PieceLandedEvent, 
-                                     CombatCalculateEvent, CombatResolvedEvent)
+from game_engine.core.events import MoveAttemptEvent, PathCheckEvent, PieceLandedEvent
 from game_engine.core.game import Game
 from game_engine.rules.chess_movement import is_legal_move, get_path
-from game_engine.rules.combat import compute_probability
+from game_engine.rules.combat import resolve_combat
 from game_engine.actions.base_action import BaseAction
 
 
@@ -66,6 +65,17 @@ class MoveAction(BaseAction):
 
         # Déplacement physique
         target_piece = board.get_piece(self.to_pos)
+
+        # Combat éventuel
+        if target_piece is not None:
+            attacker = piece
+            defender = target_piece
+            success = resolve_combat(game, attacker, defender)
+            if not success:
+                game.end_turn()
+                return
+
+        # Le combat se passe "en l'air"
         board.move_piece(self.from_pos, self.to_pos)
 
         # Pièce arrivée
@@ -74,49 +84,6 @@ class MoveAction(BaseAction):
             piece_id=piece.piece_id
         )
         event_bus.emit(landed_event, state)
-
-        # Combat éventuel
-        if target_piece is not None:
-            attacker = piece
-            defender = target_piece
-            
-            x = attacker.force  # Valeurs par défaut
-            y = defender.force
-            k = 0.485  # Valeur de lissage de la probabilité de capture
-            a = 1.75   # Valeur d'aventage pour l'attaquant 
-
-            calc_event = CombatCalculateEvent(
-                attacker_id=attacker.piece_id,
-                defender_id=defender.piece_id,
-                x=x, y=y, k=k, a=a
-            )  # type: ignore
-            event_bus.emit(calc_event, state)
-            if calc_event.cancelled:
-                return
-
-            probability = compute_probability(
-                calc_event.x, calc_event.y,
-                calc_event.k, calc_event.a
-            )
-            calc_event.probability = probability
-
-            roll = state.rng.random()
-            success = roll <= probability
-
-            resolve_event = CombatResolvedEvent(
-                attacker_id=attacker.piece_id,
-                defender_id=defender.piece_id,
-                success=success,
-                probability=probability
-            )  # type: ignore
-            event_bus.emit(resolve_event, state)
-
-            if success:  # Défenseur détruit
-                board.remove_piece(self.to_pos)
-                board.set_piece(self.to_pos, attacker)
-            else:  # Attaquant détruit
-                board.remove_piece(self.from_pos)
-                board.set_piece(self.to_pos, defender)
 
         # Passage au tour de l'adversaire
         game.end_turn()
