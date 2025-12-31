@@ -1,5 +1,6 @@
 import traceback
 import threading
+from dash import no_update
 import socketio, requests
 
 
@@ -16,6 +17,7 @@ lock = threading.Lock()
 latest_state = None
 new_state_available = False
 legal_moves_cache = None
+capture_probas_cache = None
 new_legal_moves = False
 
 
@@ -49,9 +51,10 @@ def init_network(app):
 
     @sio.on("legal_moves_result")  # type: ignore
     def on_legal_moves(data):  # TODO : fix issue : here double call, i need to find why
-        global legal_moves_cache, new_legal_moves
+        global legal_moves_cache, new_legal_moves, capture_probas_cache
         with lock:
             legal_moves_cache = data["moves"]
+            capture_probas_cache = data.get("capture_probas", {})
             new_legal_moves = True
 
     sio.connect(WS_URL, transports=["websocket", "polling"], namespaces=["/"])
@@ -65,13 +68,13 @@ def pull_state():
         if new_state_available and latest_state:
             new_state_available = False
             return latest_state
-        return None
+        return no_update
 
 def pull_moves():
     """Appelé en polling pour mise à jour Dash"""
-    global new_legal_moves
+    global new_legal_moves, capture_probas_cache
     with lock:
         if new_legal_moves and legal_moves_cache is not None:
             new_legal_moves = False
-            return legal_moves_cache
-        return None
+            return legal_moves_cache, capture_probas_cache
+        return no_update, no_update

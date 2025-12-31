@@ -14,6 +14,7 @@ def build_layout():
         dcc.Store(id="game_id", data="test_game"),  # TODO : change this to get the real game_id
         dcc.Store(id="game_state_store"),
         dcc.Store(id="available_moves_store", data=[]),
+        dcc.Store(id="capture_probas_store", data={}),
 
         html.H1("Chess Overdrive", className="text-center mt-3 mb-4"),
 

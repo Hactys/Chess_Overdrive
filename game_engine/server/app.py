@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, join_room, emit
 
+from game_engine.rules.combat import calculate_combat_proba
 from game_engine.server.game_manager import GameManager
 from game_engine.server.schemas import state_to_dict
 from game_engine.server.api_actions import parse_action
@@ -55,9 +56,26 @@ def ws_legal_moves(data):
     player = data.get("player", "white")
 
     game = manager.get_game(game_id)
-    moves = game.get_legal_moves(player, pos)
+    board = game.state.board
 
-    emit("legal_moves_result", {"from": pos, "moves": moves}, room=game_id)  # type: ignore
+    attacker = board.get_piece(pos)
+    if attacker is None:
+        return
+    
+    moves = game.get_legal_moves(player, pos)
+    capture_probas = {}
+
+    for pos in moves:
+        defender = board.get_piece(pos)
+        if defender and defender.owner != attacker.owner:
+            proba = calculate_combat_proba(game, attacker, defender)
+            capture_probas[pos] = proba
+    
+    
+
+    emit("legal_moves_result", 
+         {"from": pos, "moves": moves, "capture_probas": capture_probas}, 
+         room=game_id)  # type: ignore
 
 
 if __name__ == "__main__":

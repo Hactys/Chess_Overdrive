@@ -9,21 +9,24 @@ def register_callbacks(app):
     @app.callback(
         Output("game_state_store", "data"),
         Output("available_moves_store", "data"),
+        Output("capture_probas_store", "data"),
         Input("state_poll", "n_intervals"),
     )
     def refresh_state(_):
         state = pull_state()
-        moves = pull_moves()
-        return state if state is not None else no_update, moves if moves is not None else no_update
+        moves, captures = pull_moves()
+        return state, moves, captures
 
     # Update board when state changes
     @app.callback(
         [Output(f"square-{f}{r}","children") for r in range(8,0,-1) for f in "abcdefgh"],
         Input("game_state_store", "data"),
-        Input("available_moves_store", "data")
+        Input("available_moves_store", "data"),
+        State("capture_probas_store", "data")
     )
-    def display_board(state, legal_moves):
-        highlighted = set(legal_moves) if ctx.triggered[0]['prop_id'] != "game_state_store.data" else set()
+    def display_board(state, legal_moves, capture_probas):
+        highlighted = set(legal_moves) if ctx.triggered[0]['prop_id'] == "available_moves_store.data" else set()
+        capture_probas = capture_probas or {}
         if not state:
             sio.emit("action",{
                 "game_id":"test_game",
@@ -31,11 +34,24 @@ def register_callbacks(app):
             })
             return [""]*64
         mapping = dict(render_board(state))
-        return [html.Span(
-            mapping.get(f"square-{f}{r}", ""), 
-            style={"outline":"3px solid yellow"} if f"{f}{r}" in highlighted else {}
-            ) for r in range(8,0,-1) for f in "abcdefgh"
-        ]
+        rendered = []
+        for r in range(8,0,-1):
+            for f in "abcdefgh":
+                pos = f"{f}{r}"
+                child = mapping.get(f"square-{pos}", "")
+                title = None
+                if pos in capture_probas:
+                    title = f"Chance de capture : {int(capture_probas[pos]*100)}%"
+                rendered.append(
+                    html.Span(child, title=title,
+                              style={
+                                  "outline": "3px solid red" if pos in capture_probas else
+                                  "3px solid yellow" if pos in highlighted else "none"
+                                  }
+                    )
+                )
+
+        return rendered
 
     # Clics sur plateau (MVP: premier clic=from, second clic=to)
     selected = {"from":None}
