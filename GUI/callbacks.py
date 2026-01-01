@@ -4,6 +4,14 @@ from state_manager import pull_state, pull_moves, sio
 from board_renderer import render_board
 
 
+def get_color(prob):
+    # Interpolation entre Rouge (0, 255, 0) et Vert (255, 0, 0)
+    # prob = 0 -> Rouge | prob = 1 -> Vert
+    r = int(255 * (1 - prob))
+    g = int(255 * prob)
+    return f"rgb({r}, {g}, 0)"
+
+
 def register_callbacks(app):
     # Update store from server
     @app.callback(
@@ -14,8 +22,10 @@ def register_callbacks(app):
     )
     def refresh_state(_):
         state = pull_state()
+        if state is not no_update:
+            return state, [], {}
         moves, captures = pull_moves()
-        return state, moves, captures
+        return no_update, moves, captures
 
     # Update board when state changes
     @app.callback(
@@ -41,12 +51,12 @@ def register_callbacks(app):
                 child = mapping.get(f"square-{pos}", "")
                 title = None
                 if pos in capture_probas:
-                    title = f"Chance de capture : {int(capture_probas[pos]*100)}%"
+                    title = f"Chance de capture : {int(capture_probas[pos]*100):.1f}%"
                 rendered.append(
                     html.Span(child, title=title,
                               style={
-                                  "outline": "3px solid red" if pos in capture_probas else
-                                  "3px solid yellow" if pos in highlighted else "none"
+                                  "outline": f"3px solid {get_color(capture_probas[pos])}" if pos in capture_probas else
+                                  "3px solid white" if pos in highlighted else "none"
                                   }
                     )
                 )
