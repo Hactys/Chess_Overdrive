@@ -38,16 +38,20 @@ class ChessMovementRule(MoveRule):  # mouvements classiques d'échecs
                 cy += dy
 
         p=piece.piece_type.lower()
-        if p == "pawn":
+        if p == "pawn":  # TODO : En passant
             direction = 1 if piece.owner=="white" else -1
-            forward = coords_to_pos(fx, fy+direction)
-            if board.is_inside(forward) and not board.get_piece(forward):
-                moves.append(forward)
-            for dx in (-1,1):
-                cap = coords_to_pos(fx+dx, fy+direction)
+            start_row = 1 if piece.owner == "white" else 6
+            forward1 = coords_to_pos(fx, fy + direction)  # Case devant
+            if board.is_inside(forward1) and not board.get_piece(forward1):
+                moves.append(forward1)
+                forward2 = coords_to_pos(fx, fy + 2*direction)  # Avancée de 2 si sur case de départ
+                if fy == start_row and board.is_inside(forward2) and not board.get_piece(forward2):
+                    moves.append(forward2)
+            for dx in (-1, 1):  # Captures diagonales
+                cap = coords_to_pos(fx + dx, fy + direction)
                 if board.is_inside(cap):
                     t = board.get_piece(cap)
-                    if t and t.owner!=piece.owner:
+                    if t and t.owner != piece.owner:
                         moves.append(cap)
 
         if p=="rook":   
@@ -170,12 +174,15 @@ def is_legal_move(state: GameState, from_pos: Square, to_pos: Square) -> bool:
 
     if ptype == "pawn":  # TODO : rajouter l'implémentation pour la gravité inversée
         direction = 1 if piece.owner == "white" else -1
-        # Avancée simple
-        if dx == 0 and dy == direction and target is None:
+        start_row = 1 if piece.owner == "white" else 6
+        if dx == 0 and dy == direction and target is None: # Avancée simple
             return True
-        # Capture
-        if abs(dx) == 1 and dy == direction and target is not None:
+        if dx == 0 and dy == 2 * direction and target is None and fy == start_row: # Avancée double depuis la ligne de départ
+            # chemin vérifié plus tard via PathCheckEvent + get_path
             return True
+        if abs(dx) == 1 and dy == direction and target is not None:  # Capture diagonale
+            return True
+
         return False
     if ptype == "rook":
         return dx == 0 or dy == 0
