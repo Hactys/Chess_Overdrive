@@ -1,0 +1,17 @@
+<h3>Captures</h3>
+{% if not state %}En attente...{% else %}
+<div style="display:flex;gap:8px;">
+    {% for p,pdata in state["players"].items() %}
+        <div>
+            <b>{{ p }}</b><br>
+            {% if pdata.get("captures") %}
+                {% for c in pdata.captures %}
+                    <img src="/static/pieces/{{ c }}.svg" width="30">
+                {% endfor %}
+            {% else %}
+                <i>0</i>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}

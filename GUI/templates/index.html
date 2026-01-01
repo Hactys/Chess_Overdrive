@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chess Overdrive</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/htmx.org"></script>
+</head>
+<body>
+    
+
+<h1 style="text-align:center;">Chess Overdrive</h1>
+
+<div id="game-root" style="display:flex;gap:20px;justify-content:center;margin-top:20px;">
+    <!-- Plateau de jeu -->
+    <div id="board-container"
+        hx-get="/board"
+        hx-trigger="load, refresh_board from:body"
+        hx-swap="innerHTML">
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div style="width:300px;">
+        
+        <!-- Overdrive -->
+        <div id="overdrive" 
+             hx-get="/overdrive" 
+             hx-trigger="load" 
+             hx-swap="innerHTML" 
+             style="margin-bottom:20px;">
+        </div>
+
+        <!-- Cartes -->
+        <div id="hand"
+             hx-get="/hand"
+             hx-trigger="load"
+             hx-swap="innerHTML"
+             style="margin-bottom:20px;">
+        </div>
+
+        <!-- Captures -->
+        <div id="captures"
+             hx-get="/captures"
+             hx-trigger="load"
+             hx-swap="innerHTML">
+        </div>
+
+    </div>
+</div>
+
+
+
+
+<!-- Websocket auto refresh -->
+<script>
+let ws = new WebSocket(`ws://${location.host}/ws`);
+
+ws.onopen = () => console.log("%c[WS OPEN]","color:lime");
+ws.onerror = e => console.log("%c[WS ERROR]","color:red", e);
+ws.onclose = () => console.log("%c[WS CLOSED]","color:orange");
+
+ws.onmessage = (event)=>{
+    console.log("%c[WS MESSAGE]","color:cyan", event.data);
+    if(event.data === "update_state"){
+        htmx.trigger("#board-container","load")
+        htmx.trigger("#overdrive","load")
+        htmx.trigger("#hand","load")
+        htmx.trigger("#captures","load")
+        document.body.dispatchEvent(new Event("refresh_board"))
+    }
+};
+</script>
+
+</body>
+</html>

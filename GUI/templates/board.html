@@ -1,0 +1,38 @@
+{% if board %}
+
+
+<div class="board-container"
+     style="display:inline-block;border:4px solid #222;border-radius:6px;padding:6px;user-select:none">
+
+{% for r in range(8,0,-1) %}
+    <div style="display:flex">
+    {% for f in 'abcdefgh' %}
+        {% set pos = f ~ r %}
+        {% set square_color = '#C06DF3' if (loop.index0 + r) % 2 == 0 else '#F3C06D' %}
+        {% set piece = board.get(pos) %}
+
+        <div hx-post="/click/{{ pos }}"
+             hx-target="#board-container"
+             hx-swap="innerHTML"
+             style="
+                width:60px;height:60px;display:flex;align-items:center;justify-content:center;
+                background: {{square_color}};border:1px solid #333;cursor:pointer;
+                {% if pos == selected %}outline:4px solid yellow;{% endif %}
+                {% if legal and pos in legal %}outline:4px solid white;{% endif %}
+                {% if probas and pos in probas %}outline:4px solid {{ probas[pos] | probacolor }};{% endif %}
+             ">
+            {% if piece %}
+            <img src="/static/pieces/{{ PIECE_IMAGE_MAP[(piece.owner, piece.type)] }}"
+                 style="width:48px;pointer-events:none">
+            {% endif %}
+        </div>
+
+    {% endfor %}
+    </div>
+{% endfor %}
+
+</div>
+
+{% else %}
+<p>En attente du moteur de jeu...</p>
+{% endif %}

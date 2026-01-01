@@ -1,0 +1,13 @@
+<h3>Cartes</h3>
+{% if not state %}En attente...{% else %}
+<div>
+    {% set hand = state["players"][state["current_player"]].get("hand", []) %}
+    {% if hand %}
+        {% for card in hand %}
+            <div class="card">{{ card }}</div>
+        {% endfor %}
+    {% else %}
+        <i>Aucune carte</i>
+    {% endif %}
+</div>
+{% endif %}
