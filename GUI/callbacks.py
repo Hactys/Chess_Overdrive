@@ -35,7 +35,7 @@ def register_callbacks(app):
         State("capture_probas_store", "data")
     )
     def display_board(state, legal_moves, capture_probas):
-        highlighted = set(legal_moves) if ctx.triggered[0]['prop_id'] == "available_moves_store.data" else set()
+        highlighted = set(legal_moves or [])
         capture_probas = capture_probas or {}
         if not state:
             sio.emit("action",{
