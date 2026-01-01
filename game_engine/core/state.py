@@ -4,6 +4,8 @@ from typing import Dict, List
 from game_engine.cards.base_card import CardInstance
 from game_engine.effects.base_effect import EffectInstance
 from game_engine.traps.base_trap import TrapInstance
+from game_engine.rules.overload import overload_probability
+
 from .board import Board
 from .rng import RNG
 from .events import GameEvent
@@ -70,4 +72,8 @@ class GameState:
             ],
             "active_traps": list(self.active_traps.keys()),
             "rng_seed": self.rng.seed,
+            "overload_info": {
+                pid: overload_probability(player.overdrive)
+                for pid, player in self.players.items()
+            }
         }

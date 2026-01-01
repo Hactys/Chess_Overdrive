@@ -1,5 +1,9 @@
-from game_engine.core.state import GameState
+from typing import TYPE_CHECKING
+
 from game_engine.core.events import OverdriveChangedEvent
+
+if TYPE_CHECKING:
+    from game_engine.core.state import GameState
 
 
 def gain_overdrive_generic(state: GameState, player_id: str, cause: str, amount: float):

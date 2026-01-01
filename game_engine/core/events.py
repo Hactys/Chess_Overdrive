@@ -90,3 +90,23 @@ class OverdriveChangedEvent(GameEvent):
     player_id: str = ""
     delta: float = 0.0
     new_value: float = 0.0
+
+
+@dataclass
+class TriggerOverloadEvent(GameEvent):
+    player_id: str = ""
+    probability: float = 0.0
+    triggered: bool = False    # définit si l'entrée en overload a eu lieu
+
+
+@dataclass
+class OverloadExplosionEvent(GameEvent):
+    player_id: str = ""
+    piece_id: str = ""          # pièce détruite par l’explosion
+    destroyed: list[str] = field(default_factory=list)  # list des pièces adjacentes détruites incluses
+
+
+@dataclass
+class EndOverloadEvent(GameEvent):
+    player_id: str = ""
+    reason: str = "stabilized"  # ex: retour sous 100, carte, événement etc.
