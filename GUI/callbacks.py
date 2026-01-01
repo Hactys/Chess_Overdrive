@@ -1,5 +1,6 @@
 import requests
 from dash import Input, Output, State, html, ctx, no_update
+from dash.development.base_component import Component
 from state_manager import pull_state, pull_moves, sio
 from board_renderer import render_board
 
@@ -109,3 +110,52 @@ def register_callbacks(app):
             selected["from"]=None
 
         return {"padding":"2vw"}
+
+    @app.callback(
+        Output("overdrive_bars","children"),
+        Input("game_state_store", "data"),
+    )
+    def display_overdrive(state):
+        if not state:
+            return no_update
+        players = state["players"]
+        player_ids = list(players.keys())  # On garde un ordre stable (important pour l'UI)
+        bars: list[Component] = [html.H4("Overdrive", className="text-center")]
+        for pid in player_ids:
+            overdrive = players[pid].get("overdrive", 0.0)
+            percent = max(0, min(int(overdrive), 100))   # Crop visuel (Overdrive peut dépasser 100)
+            bar_color = "#f39c12" if pid == "white" else "#9b59b6"
+            bars.append(
+                html.Div(
+                    style={
+                        "position": "relative", "height": "30px",
+                        "background": "#333", "marginTop": "6px",
+                        "borderRadius": "4px", "overflow": "hidden",
+                    },
+                    children=[
+                        # Barre dynamique
+                        html.Div(
+                            style={
+                                "position": "absolute", "left": 0, "top": 0,
+                                "height": "100%", "width": f"{percent}%",
+                                "background": bar_color,
+                                "transition": "width 0.2s ease",
+                            }
+                        ),
+                        # Texte par-dessus
+                        html.Div(
+                            f"{overdrive:.1f}%",
+                            style={
+                                "position": "absolute", "top": 0, "left": 0, 
+                                "width": "100%", "height": "100%",
+                                "display": "flex", "alignItems": "center",
+                                "justifyContent": "center", "color": "white",
+                                "fontWeight": "bold", "pointerEvents": "none",
+                                "textShadow": "0 0 4px rgba(0,0,0,0.8)",
+                            }
+                        ),
+                    ]
+                )
+            )
+
+        return bars

@@ -6,4 +6,4 @@ def overdrive_bars():
         html.H4("Overdrive",className="text-center"),
         html.Div("Jauge joueur blanc [à venir]",style={"height":"30px","background":"#555"}),
         html.Div("Jauge joueur noir [à venir]",style={"height":"30px","background":"#333","marginTop":"5px"}),
-    ],className="mb-3")
+    ],className="mb-3", id="overdrive_bars")
