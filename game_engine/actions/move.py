@@ -60,7 +60,7 @@ class MoveAction(BaseAction):
         path: List[Square] = get_path(self.from_pos, self.to_pos)
         path_event = PathCheckEvent(path=path)
         event_bus.emit(path_event, state)
-        if path_event.cancelled:
+        if path_event.cancelled:  # Normalement jamais le cas
             return
 
         # Déplacement physique

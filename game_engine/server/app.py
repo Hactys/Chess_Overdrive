@@ -70,8 +70,6 @@ def ws_legal_moves(data):
         if defender and defender.owner != attacker.owner:
             proba = calculate_combat_proba(game, attacker, defender)
             capture_probas[pos] = proba
-    
-    
 
     emit("legal_moves_result", 
          {"from": pos, "moves": moves, "capture_probas": capture_probas}, 
