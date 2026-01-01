@@ -11,7 +11,7 @@ def board_component():
     for r in ranks:
         row=[]
         for i,f in enumerate(files):
-            base_color = "#2c3e50" if (i+r)%2==0 else "#34495e"
+            base_color = "#C06DF3" if (i+r)%2==0 else "#F3C06D"
             row.append(html.Div(
                 id=f"square-{square_id(f,r)}",
                 className="board-square",
