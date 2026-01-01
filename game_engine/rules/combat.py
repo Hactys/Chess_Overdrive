@@ -3,6 +3,7 @@ import math
 from game_engine.core.game import Game
 from game_engine.core.board import Piece
 from game_engine.core.events import CombatCalculateEvent, CombatResolvedEvent
+from game_engine.rules.overdrive import gain_overdrive_from_attack
 
 
 def calculate_combat_proba(game: Game, attacker: Piece, defender: Piece) -> float:
@@ -55,6 +56,8 @@ def resolve_combat(game: Game, attacker: Piece, defender: Piece) -> bool:
     game.state.event_bus.emit(resolve_event, game.state)
 
     if not resolve_event.cancelled:
+        gain_overdrive_from_attack(game.state, attacker.owner, probability, success)
+
         attacker_square = game.state.board.get_square(attacker.piece_id)
         defender_square = game.state.board.get_square(defender.piece_id)
         if success :  # Défenseur détruit
