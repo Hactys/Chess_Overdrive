@@ -16,8 +16,8 @@ def calculate_combat_proba(game: Game, attacker: Piece, defender: Piece) -> floa
     # Valeurs par défaut
     x = attacker.force
     y = defender.force
-    k = 0.485
-    a = 1.75
+    k = 1.514
+    a = 1.25
 
     calc_event = CombatCalculateEvent(
                     attacker_id=attacker.piece_id,
@@ -30,7 +30,7 @@ def calculate_combat_proba(game: Game, attacker: Piece, defender: Piece) -> floa
     
     x, y, k, a = calc_event.x, calc_event.y, calc_event.k, calc_event.a
 
-    exponent = -k * (x - y + a)
+    exponent = -k * (math.sqrt(x) - math.sqrt(y) + a)
     probability =  1.0 / (1.0 + math.exp(exponent))
 
     return probability
