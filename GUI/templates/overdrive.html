@@ -4,7 +4,7 @@
 <h3>Overdrive</h3>
 {% for pid, pdata in state["players"].items() %}
 <div class="overdrive-bar">
-    <div style="background:{{ 'orange' if pid=='white' else 'purple' }};width:{{ pdata.overdrive }}%;height:20px;"></div>
+    <div style="background:{{ 'orange' if pid=='white' else 'purple' }};width:{{ [pdata.overdrive, 100]|min }}%;height:20px;"></div>
     <span>{{ pid }} : {{ pdata.overdrive|round(1) }}%</span>
 </div>
 {% endfor %}
