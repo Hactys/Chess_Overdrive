@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from GUI.ws_game_client import sio
 from GUI.core.templates import templates
 from GUI.services.renderer import render_board
+from GUI.services.game_registry import list_games
 from GUI.services.state_cache import get_state, get_moves, get_selected, set_selected, clear_moves
 
 
@@ -15,6 +16,12 @@ DEFAULT_PLAYER_ID = "white"  # TODO : True player id
 
 @router.get("/game/{game_id}")
 async def game_page(request: Request, game_id: str):
+    games = await list_games()
+    if game_id not in games.keys():  # Si la game_id est invalide, on renvoie sur le lobby
+        return RedirectResponse(
+            url=f"/",
+            status_code=303
+        )
     return templates.TemplateResponse(
         "game.html",
         {"request": request, "game_id": game_id}
