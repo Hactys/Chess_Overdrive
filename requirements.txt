@@ -1,0 +1,12 @@
+flask
+aiohttp
+uvicorn
+fastapi
+requests
+flask_socketio
+
+pytest
+pytest-asyncio
+httpx
+asgi-lifespan
+pytest-cov
