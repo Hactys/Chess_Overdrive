@@ -72,7 +72,7 @@ def ws_legal_moves(data):
             capture_probas[pos] = proba
 
     emit("legal_moves_result", 
-         {"from": pos, "moves": moves, "capture_probas": capture_probas}, 
+         {"game_id":game_id, "from": pos, "moves": moves, "capture_probas": capture_probas}, 
          room=game_id)  # type: ignore
 
 

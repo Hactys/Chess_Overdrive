@@ -1,7 +1,7 @@
 {% if board %}
 
 
-<div class="board-container"
+<div class="board"
      style="display:inline-block;border:4px solid #222;border-radius:6px;padding:6px;user-select:none">
 
 {% for r in range(8,0,-1) %}
@@ -11,7 +11,7 @@
         {% set square_color = '#C06DF3' if (loop.index0 + r) % 2 == 0 else '#F3C06D' %}
         {% set piece = board.get(pos) %}
 
-        <div hx-post="/click/{{ pos }}"
+        <div hx-post="/game/{{ game_id }}/click/{{ pos }}"
              hx-target="#board-container"
              hx-swap="innerHTML"
              style="

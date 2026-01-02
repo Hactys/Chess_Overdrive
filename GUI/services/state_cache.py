@@ -1,45 +1,47 @@
 import asyncio
+from collections import defaultdict
 
-_state = None  # TODO : remplacer tout ça par des dict pour la version multijoueur
-_moves = None
-_probas = None
-_selected = None
+
+_states = {}
+_moves = {}
+_probas = {}
+_selected = {}
 
 _lock = asyncio.Lock()
 
 
-async def set_state(state):
-    global _state
+async def set_state(game_id, state):
     async with _lock:
-        _state = state
+        _states[game_id] = state
 
-async def get_state():
+async def get_state(game_id):
     async with _lock:
-        return _state
-
-
-async def set_moves(moves, probas):
-    global _moves, _probas
-    async with _lock:
-        _moves = moves
-        _probas = probas
-
-async def get_moves():
-    async with _lock:
-        return _moves, _probas
-    
-async def clear_moves():
-    global _moves, _probas
-    async with _lock:
-        _moves = None
-        _probas = None
+        return _states.get(game_id)
 
 
-async def set_selected(pos: str | None):
-    global _selected
+async def set_moves(game_id, moves, probas):
     async with _lock:
-        _selected = pos
+        _moves[game_id] = moves
+        _probas[game_id] = probas
 
-async def get_selected():
+async def get_moves(game_id):
     async with _lock:
-        return _selected
+        return _moves.get(game_id), _probas.get(game_id)
+
+
+async def set_selected(game_id, player_id, pos):
+    async with _lock:
+        _selected[(game_id, player_id)] = pos
+
+async def get_selected(game_id, player_id):
+    async with _lock:
+        return _selected.get((game_id, player_id))
+
+
+async def clear_selected(game_id, player_id):
+    async with _lock:
+        _selected.pop((game_id, player_id), None)
+
+async def clear_moves(game_id):
+    async with _lock:
+        _moves.pop(game_id, None)

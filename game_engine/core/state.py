@@ -37,6 +37,7 @@ class PlayerState:
 @dataclass
 class GameState:
     board: Board
+    game_id: str
     players: Dict[PlayerID, PlayerState]
     current_player: PlayerID
     turn: int = 1
@@ -59,6 +60,7 @@ class GameState:
 
     def to_dict(self) -> dict:
         return {
+            "game_id": self.game_id,
             "turn": self.turn,
             "current_player": self.current_player,
             "players": {pid: player.to_dict() for pid, player in self.players.items()},

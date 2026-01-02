@@ -18,7 +18,7 @@ PIECE_IMAGE_MAP = {
 }
 
 
-def render_board(request, state, selected=None, legal_moves=None, capture_probas=None):
+def render_board(request, game_id, state, selected=None, legal_moves=None, capture_probas=None):
     """
     selected      = case source cliquée
     legal_moves   = liste positions jouables pour cette pièce
@@ -28,6 +28,7 @@ def render_board(request, state, selected=None, legal_moves=None, capture_probas
         "board.html",
         {
             "request": request,
+            "game_id": game_id,
             "board": state["board"]["pieces"] if state else {},
             "selected": selected,
             "legal": legal_moves or [],

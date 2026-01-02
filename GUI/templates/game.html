@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chess Overdrive</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/htmx.org"></script>
+</head>
+
+<body>
+
+<h1 style="text-align:center;">Chess Overdrive</h1>
+
+<div id="game-root"
+     style="display:flex;gap:20px;justify-content:center;margin-top:20px;">
+
+    <!-- BOARD -->
+    <div id="board-container"
+         hx-get="/game/{{ game_id }}/board"
+         hx-trigger="load, refresh_board from:body"
+         hx-swap="innerHTML">
+        Chargement du plateau...
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div style="width:300px;">
+
+        <div id="overdrive"
+             hx-get="/game/{{ game_id }}/overdrive"
+             hx-trigger="load"
+             hx-swap="innerHTML"
+             style="margin-bottom:20px;">
+        </div>
+
+        <div id="hand"
+             hx-get="/game/{{ game_id }}/hand"
+             hx-trigger="load"
+             hx-swap="innerHTML"
+             style="margin-bottom:20px;">
+        </div>
+
+        <div id="captures"
+             hx-get="/game/{{ game_id }}/captures"
+             hx-trigger="load"
+             hx-swap="innerHTML">
+        </div>
+
+    </div>
+</div>
+
+<script>
+const gameId = "{{ game_id }}";
+const ws = new WebSocket(`ws://${location.host}/ws/${gameId}`);
+
+ws.onmessage = () => {
+    htmx.trigger("#board-container", "refresh_board");
+    htmx.trigger("#overdrive", "load");
+    htmx.trigger("#hand", "load");
+    htmx.trigger("#captures", "load");
+};
+</script>
+
+</body>
+</html>

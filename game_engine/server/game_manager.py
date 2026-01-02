@@ -22,6 +22,7 @@ class GameManager:
         setup_standard_board(board)
         state = GameState(
             board=board,
+            game_id=game_id,
             players=player_states,  
             current_player=list(player_states.keys())[0],
             rng=RNG(seed=42),  # TODO : passer la graine de RNG en argument de la fonction
