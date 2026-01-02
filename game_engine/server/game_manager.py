@@ -1,4 +1,6 @@
 from typing import Dict
+from hashlib import sha256
+
 from game_engine.core.game import Game
 from game_engine.core.state import GameState, PlayerState
 from game_engine.core.board import Board, Piece
@@ -11,6 +13,10 @@ class GameManager:
     def __init__(self):
         self.games: Dict[str, Game] = {}   # game_id -> Game
 
+    def _generate_seed(self, game_id: str) -> int:
+        """Génère une seed numérique stable à partir du game_id."""
+        return int(sha256(game_id.encode()).hexdigest()[:16], 16)
+
     def create_game(self, game_id: str, players: Dict[str, dict]):
         player_states = {}
 
@@ -19,13 +25,14 @@ class GameManager:
             player_states[pid] = PlayerState(player_id=pid)
 
         board = Board()
+        game_seed = self._generate_seed(game_id)
         setup_standard_board(board)
         state = GameState(
             board=board,
             game_id=game_id,
             players=player_states,  
             current_player=list(player_states.keys())[0],
-            rng=RNG(seed=42),  # TODO : passer la graine de RNG en argument de la fonction
+            rng=RNG(seed=game_seed),
         )  # type: ignore
 
         bus = EventBus()
@@ -45,7 +52,6 @@ def setup_standard_board(board):
     Les valeurs sont modifiables pour équilibrer le système.
     Agi par effet de bord.
     """
-
     # pièces blanches 
     pieces_white = {
         "a1": ("rook", 3), "b1": ("knight", 3), "c1": ("bishop", 3),
@@ -57,7 +63,6 @@ def setup_standard_board(board):
 
     for pos, (ptype, force) in pieces_white.items():
         board.set_piece(pos, Piece(piece_id=f"w_{pos}", owner="white", piece_type=ptype, force=force))
-
 
     # pièces noires 
     pieces_black = {
