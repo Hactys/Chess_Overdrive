@@ -8,7 +8,7 @@
     <div style="display:flex">
     {% for f in 'abcdefgh' %}
         {% set pos = f ~ r %}
-        {% set square_color = '#C06DF3' if (loop.index0 + r) % 2 == 0 else '#F3C06D' %}
+        {% set square_color = '#C06DF3' if (loop.index0 + r + 1) % 2 == 0 else '#F3C06D' %}
         {% set piece = board.get(pos) %}
 
         <div hx-post="/game/{{ game_id }}/click/{{ pos }}"

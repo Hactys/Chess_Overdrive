@@ -35,22 +35,9 @@ static_path = os.path.join(os.path.dirname(templates_path), "static")
 app.mount("/static", StaticFiles(directory=static_path), name="static")
 
 
-def probacolor(prob):
-    r = int(255 * (1 - prob))
-    g = int(255 * prob)
-    return f"rgb({r},{g},0)"
-
-templates.env.filters["probacolor"] = probacolor
-
-
 app.include_router(lobby_router)
 app.include_router(game_router)
 app.include_router(ws_router)
-
-
-@app.get("/")
-async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
 
 
 if __name__ == "__main__":
