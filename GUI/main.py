@@ -6,11 +6,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 
-from core.templates import templates, templates_path
-from routers.game import router as game_router
-from routers.lobby import router as lobby_router
-from routers.ws import router as ws_router
-from ws_game_client import init_connection, sio
+from GUI.core.templates import templates, templates_path
+from GUI.routers.game import router as game_router
+from GUI.routers.lobby import router as lobby_router
+from GUI.routers.ws import router as ws_router
+from GUI.ws_game_client import init_connection, sio
 
 
 @asynccontextmanager

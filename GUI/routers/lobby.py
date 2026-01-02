@@ -4,8 +4,8 @@ import requests
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 
-from core.templates import templates
-from services.game_registry import register_game, list_games, join_game
+from GUI.core.templates import templates
+from GUI.services.game_registry import register_game, list_games, join_game
 
 
 ENGINE_HTTP = "http://localhost:5000"

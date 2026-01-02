@@ -1,4 +1,4 @@
-from core.templates import templates
+from GUI.core.templates import templates
 
 
 PIECE_IMAGE_MAP = {

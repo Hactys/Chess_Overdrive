@@ -1,9 +1,8 @@
 import socketio
 import asyncio
-import requests
 
-from services.room_manager import room_manager
-from services.state_cache import set_state, set_moves
+from GUI.services.room_manager import room_manager
+from GUI.services.state_cache import set_state, set_moves
 
 
 ENGINE_HTTP = "http://localhost:5000"   # Endpoint REST du moteur

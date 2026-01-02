@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
-from ws_game_client import sio
-from core.templates import templates
-from services.renderer import render_board
-from services.state_cache import get_state, get_moves, get_selected, set_selected, clear_moves
+from GUI.ws_game_client import sio
+from GUI.core.templates import templates
+from GUI.services.renderer import render_board
+from GUI.services.state_cache import get_state, get_moves, get_selected, set_selected, clear_moves
 
 
 router = APIRouter()

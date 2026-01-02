@@ -1,7 +1,7 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from services.room_manager import room_manager
-from services.state_cache import get_state
+from GUI.services.room_manager import room_manager
+from GUI.services.state_cache import get_state
 
 
 router = APIRouter()

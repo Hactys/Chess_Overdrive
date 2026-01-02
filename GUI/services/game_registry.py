@@ -1,6 +1,6 @@
 import asyncio
 from datetime import datetime, timezone
-from ws_game_client import sio
+from GUI.ws_game_client import sio
 
 _games = {}
 _lock = asyncio.Lock()
