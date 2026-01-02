@@ -44,3 +44,7 @@ async def clear_selected(game_id, player_id):
 async def clear_moves(game_id):
     async with _lock:
         _moves.pop(game_id, None)
+
+async def clear_proba(game_id):
+    async with _lock:
+        _probas.pop(game_id, None)

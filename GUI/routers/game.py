@@ -5,7 +5,7 @@ from GUI.ws_game_client import sio
 from GUI.core.templates import templates
 from GUI.services.renderer import render_board
 from GUI.services.game_registry import list_games
-from GUI.services.state_cache import get_state, get_moves, get_selected, set_selected, clear_moves
+from GUI.services.state_cache import clear_proba, get_state, get_moves, get_selected, set_selected, clear_moves
 
 
 router = APIRouter()
@@ -84,6 +84,7 @@ async def click_square(request: Request, game_id: str, pos: str):
         )
         await set_selected(game_id, DEFAULT_PLAYER_ID, None)
         await clear_moves(game_id)
+        await clear_proba(game_id)
         return render_board(request, game_id, state)
 
     # Second clic sur une autre pièce -> changer sélection

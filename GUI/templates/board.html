@@ -15,15 +15,37 @@
              hx-target="#board-container"
              hx-swap="innerHTML"
              style="
-                width:60px;height:60px;display:flex;align-items:center;justify-content:center;
-                background: {{square_color}};border:1px solid #333;cursor:pointer;
+                position: relative;
+                width:60px; height:60px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                background: {{square_color}};
+                border:1px solid #333; cursor:pointer;
                 {% if pos == selected %}outline:4px solid yellow;{% endif %}
                 {% if legal and pos in legal %}outline:4px solid white;{% endif %}
                 {% if probas and pos in probas %}outline:4px solid {{ probas[pos] | probacolor }};{% endif %}
              ">
             {% if piece %}
             <img src="/static/pieces/{{ PIECE_IMAGE_MAP[(piece.owner, piece.type)] }}"
-                 style="width:48px;pointer-events:none">
+                 style="width:48px;pointer-events:none;z-index:1">
+            {% endif %}
+            {% if pos in probas%}
+                <div
+                    style="
+                        position:absolute;
+                        bottom:2px; right:2px;
+                        padding:2px 4px; font-size:11px;
+                        font-weight:bold; color:white;
+                        background: {{ probas[pos] | probacolor }};
+                        border-radius:3px; pointer-events:none;
+                        z-index:2;
+                        text-shadow:0 0 3px rgba(0,0,0,0.8);
+                    "
+                    title="Chance de capture"
+                >
+                    {{ (probas[pos] * 100) | round(1) }}%
+                </div>
             {% endif %}
         </div>
 
