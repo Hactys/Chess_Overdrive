@@ -1,3 +1,17 @@
+"""
+Adapter GUI <-> Game Engine
+
+Responsabilités :
+- connexion Socket.IO au moteur
+- join des game_id demandés par le lobby
+- réception des events moteur
+- mise à jour du state_cache
+- broadcast vers les clients navigateur (via room_manager)
+
+⚠️ Aucune logique UI ici
+"""
+
+
 import socketio
 import asyncio
 
@@ -10,16 +24,6 @@ ENGINE_WS   = "http://localhost:5000"   # Socket.io endpoint
 
 
 sio = socketio.AsyncClient()
-
-_joined_games = set()
-
-
-async def join_game(game_id: str):
-    if game_id in _joined_games:
-        return
-    await sio.emit("join", {"game_id": game_id, "player": "white"})
-    _joined_games.add(game_id)
-    print(f"📡 [GUI] Join moteur pour game {game_id}")
 
 
 async def init_connection():
