@@ -50,6 +50,7 @@
 <script>
 const gameId = "{{ game_id }}";
 const ws = new WebSocket(`ws://${location.host}/ws/${gameId}`);
+window.gameSocket = ws
 
 ws.onmessage = () => {
     htmx.trigger("#board-container", "refresh_board");

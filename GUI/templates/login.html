@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connexion - Chess Overdrive</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/htmx.org"></script>
+</head>
+<body style="max-width:420px;margin:60px auto;font-family:sans-serif;">
+
+<h1 style="text-align:center;">♟ Chess Overdrive</h1>
+<h2 style="text-align:center;">Connexion</h2>
+
+<div id="login-box"
+     style="border:1px solid #ccc;padding:20px;border-radius:6px;">
+
+    {% if error %}
+        <div style="color:red;margin-bottom:10px;">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form
+        hx-post="/login"
+        hx-target="#login-error"
+        hx-swap="innerHTML"
+        hx-trigger="submit"
+    >
+
+        <div id="login-error" style="color:red;margin-bottom:10px;"></div>
+
+        <div style="margin-bottom:12px;">
+            <label>Email</label><br>
+            <input type="email"
+                name="email"
+                required
+                style="width:100%;padding:6px;">
+        </div>
+
+        <div style="margin-bottom:12px;">
+            <label>Mot de passe</label><br>
+            <input type="password"
+                name="password"
+                required
+                style="width:100%;padding:6px;">
+        </div>
+
+        <button type="submit"
+                style="width:100%;padding:8px;font-size:1em;">
+            Se connecter
+        </button>
+    </form>
+
+
+</div>
+
+</body>
+</html>

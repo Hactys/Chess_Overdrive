@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from GUI.db.base import Base
 from GUI.db.models import Users
 from GUI.db.services.users import get_user_by_email, create_user
+from GUI.db.services.security import verify_password, hash_password
 
 from hashlib import sha256  # DEV ONLY  # TODO : à remplacer plus tard
 
@@ -18,11 +19,6 @@ if DATABASE_URL is None:
 
 engine = create_engine(DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(bind=engine)
-
-
-def dev_hash_password(password: str) -> str:
-    """⚠️ Hash simplifié DEV ONLY"""
-    return sha256(password.encode("utf-8")).hexdigest()
 
 
 DEBUG_USERS = [
@@ -79,17 +75,17 @@ def init_db():
         for u in DEBUG_USERS:
             existing = get_user_by_email(db, u["email"])
             if existing:
-                continue
+                db.delete(existing)
             user = Users(
                 id=u["id"],
                 email=u["email"],
                 username=u["username"],
                 disambiguator=u["disambiguator"],
-                password_hash=dev_hash_password(u["password"]),
+                password_hash=hash_password(u["password"]),
                 is_bot=u["is_bot"],
             )
             db.add(user)
-            print(f"👤 User créé : {u['username']}#{u['disambiguator']}")
+            print(f"  👤 User créé : {u['username']}#{u['disambiguator']}")
         db.commit()
         print("🎉 Initialisation DB terminée")
     finally:

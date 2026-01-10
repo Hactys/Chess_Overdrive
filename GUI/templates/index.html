@@ -6,7 +6,7 @@
     <script src="https://unpkg.com/htmx.org"></script>
 </head>
 <body>
-    
+
 
 <h1 style="text-align:center;">Chess Overdrive</h1>
 
@@ -20,12 +20,12 @@
 
     <!-- SIDE PANEL -->
     <div style="width:300px;">
-        
+
         <!-- Overdrive -->
-        <div id="overdrive" 
-             hx-get="/overdrive" 
-             hx-trigger="load" 
-             hx-swap="innerHTML" 
+        <div id="overdrive"
+             hx-get="/overdrive"
+             hx-trigger="load"
+             hx-swap="innerHTML"
              style="margin-bottom:20px;">
         </div>
 
@@ -47,27 +47,16 @@
     </div>
 </div>
 
-
-
-
-<!-- Websocket auto refresh -->
 <script>
-let ws = new WebSocket(`ws://${location.host}/ws`);
-
-ws.onopen = () => console.log("%c[WS OPEN]","color:lime");
-ws.onerror = e => console.log("%c[WS ERROR]","color:red", e);
-ws.onclose = () => console.log("%c[WS CLOSED]","color:orange");
-
-ws.onmessage = (event)=>{
-    console.log("%c[WS MESSAGE]","color:cyan", event.data);
-    if(event.data === "update_state"){
-        htmx.trigger("#board-container","load")
-        htmx.trigger("#overdrive","load")
-        htmx.trigger("#hand","load")
-        htmx.trigger("#captures","load")
-        document.body.dispatchEvent(new Event("refresh_board"))
+document.body.addEventListener("htmx:beforeOnLoad", function (evt) {
+    const xhr = evt.detail.xhr;
+    if (xhr.getResponseHeader("HX-Redirect") === "/login") {
+        if (window.gameSocket) {
+            window.gameSocket.close();
+            window.gameSocket = null;
+        }
     }
-};
+});
 </script>
 
 </body>

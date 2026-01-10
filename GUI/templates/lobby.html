@@ -3,11 +3,34 @@
 <head>
     <title>Chess Overdrive</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/htmx.org"></script>
 </head>
 
 <body style="max-width:800px;margin:auto;padding:40px;">
 
 <h1>♟ Chess Overdrive - Lobby</h1>
+
+<div style="display:flex;justify-content:space-between;align-items:center;">
+    <div>
+        Connecté en tant que
+        <strong>{{ user.username }}#{{ user.disambiguator }}</strong>
+        (ELO {{ user.elo }})
+    </div>
+
+    <form
+        action="/logout"
+        method="post"
+        hx-post="/logout"
+        hx-trigger="submit"
+        hx-swap="none"
+    >
+        <button type="submit">
+            Logout
+        </button>
+    </form>
+</div>
+
+<hr>
 
 <form action="/create_game" method="post" style="margin-bottom:30px;">
     <button type="submit" style="font-size:1.1em;padding:8px 16px;">
