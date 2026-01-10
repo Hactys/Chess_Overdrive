@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from db.models import Users
+from GUI.db.models import Users
 
 
 # Lookup / Auth
