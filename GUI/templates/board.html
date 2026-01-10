@@ -11,7 +11,8 @@
         {% set square_color = '#C06DF3' if (loop.index0 + r + 1) % 2 == 0 else '#F3C06D' %}
         {% set piece = board.get(pos) %}
 
-        <div hx-post="/game/{{ game_id }}/click/{{ pos }}"
+        <div class="board-square"
+             hx-post="/game/{{ game_id }}/click/{{ pos }}"
              hx-target="#board-container"
              hx-swap="innerHTML"
              style="
