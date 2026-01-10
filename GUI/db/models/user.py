@@ -6,7 +6,7 @@ from sqlalchemy import String, Integer, Boolean, DateTime, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from db.base import Base
+from GUI.db.base import Base
 
 if TYPE_CHECKING:
     from GUI.db.models.game import Games
@@ -64,4 +64,4 @@ class Users(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<User {self.username}#{self.disambiguator} elo={self.elo}>"
+        return f"<Users {self.username}#{self.disambiguator} elo={self.elo}>"

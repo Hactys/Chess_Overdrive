@@ -3,16 +3,7 @@ from enum import Enum
 from typing import TYPE_CHECKING
 from datetime import datetime, timezone
 
-from sqlalchemy import (
-    CheckConstraint,
-    String,
-    Integer,
-    Boolean,
-    DateTime,
-    ForeignKey,
-    Text,
-    Enum as SQLEnum,
-)
+from sqlalchemy import CheckConstraint, String, Integer, Boolean, DateTime, ForeignKey, Text
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -37,6 +28,13 @@ class TerminationReason(str, Enum):
     DRAW = "draw"
 
 
+# NOTE:
+# We intentionally use TEXT + CHECK constraints instead of PostgreSQL ENUMs. PostgreSQL ENUMs
+# interact poorly with SQLAlchemy auto-DDL and CHECK constraints (enum values may not be fully
+# registered at table creation time). TEXT + CHECK provides the same safety, simpler migrations,
+# and better schema stability.
+
+
 class Games(Base):
     __tablename__ = "games"
 
@@ -48,9 +46,7 @@ class Games(Base):
         index=True,
     )
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    status: Mapped[str] = mapped_column(
-        SQLEnum(GameStatus, name="game_status"), nullable=False, index=True
-    )
+    status: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
 
     seed: Mapped[int] = mapped_column(
         Integer, nullable=False
@@ -59,13 +55,13 @@ class Games(Base):
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
     )
     white: Mapped["Users"] = relationship(
-        "User", foreign_keys=[white_id], back_populates="games_as_white"
+        "Users", foreign_keys=[white_id], back_populates="games_as_white"
     )
     black_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
     )
     black: Mapped["Users"] = relationship(
-        "User", foreign_keys=[black_id], back_populates="games_as_black"
+        "Users", foreign_keys=[black_id], back_populates="games_as_black"
     )
     winner_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
@@ -79,9 +75,7 @@ class Games(Base):
     moves: Mapped[str] = mapped_column(Text, nullable=False)  # custom PGN
     final_state: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
-    termination_reason: Mapped[str | None] = mapped_column(
-        SQLEnum(TerminationReason, name="game_termination_reason"), nullable=True
-    )
+    termination_reason: Mapped[str | None] = mapped_column(String(32), nullable=True)
     rated: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     __table_args__ = (
@@ -97,6 +91,15 @@ class Games(Base):
         CheckConstraint(
             "(status = 'finished' AND winner_id IS NOT NULL) OR (status != 'finished')",
             name="ck_game_winner_finished_only",
+        ),
+        CheckConstraint(
+            "status IN ('ongoing', 'finished', 'aborted', 'canceled')",
+            name="ck_game_status_valid",
+        ),
+        CheckConstraint(
+            "termination_reason IS NULL OR termination_reason IN "
+            "('checkmate', 'timeout', 'resign', 'withdrawal', 'draw')",
+            name="ck_game_termination_valid",
         ),
     )
 
