@@ -13,7 +13,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 manager = GameManager()
 
 
-# API HTTP 
+# API HTTP
 @app.route("/create", methods=["POST"])
 def create_game():
     data = request.json
@@ -24,7 +24,7 @@ def create_game():
     return jsonify({"status": "ok", "game_id": game_id})
 
 
-# WebSocket 
+# WebSocket
 @socketio.on("join")
 def join_game(data):
     game_id = data["game_id"]
@@ -61,7 +61,7 @@ def ws_legal_moves(data):
     attacker = board.get_piece(pos)
     if attacker is None:
         return
-    
+
     moves = game.get_legal_moves(player, pos)
     capture_probas = {}
 
@@ -71,10 +71,12 @@ def ws_legal_moves(data):
             proba = calculate_combat_proba(game, attacker, defender)
             capture_probas[pos] = proba
 
-    emit("legal_moves_result", 
-         {"game_id":game_id, "from": pos, "moves": moves, "capture_probas": capture_probas}, 
-         room=game_id)  # type: ignore
+    emit(
+        "legal_moves_result",
+        {"game_id": game_id, "from": pos, "moves": moves, "capture_probas": capture_probas},
+        room=game_id,  # type: ignore
+    )
 
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True, use_reloader=False)
