@@ -17,6 +17,7 @@ PlayerID = str
 @dataclass
 class PlayerState:
     player_id: PlayerID
+    username: str
     overdrive: float = 0.0
     hand: List["CardInstance"] = field(default_factory=list)
     deck: List[str] = field(default_factory=list)
@@ -26,6 +27,7 @@ class PlayerState:
     def to_dict(self) -> dict:
         return {
             "player_id": self.player_id,
+            "username": self.username,
             "overdrive": self.overdrive,
             "hand": [c.card_id for c in self.hand],
             "deck": list(self.deck),

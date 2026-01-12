@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 
 from GUI.core.templates import templates_path
 from GUI.routers.auth import router as auth_router
@@ -67,6 +67,11 @@ app.include_router(lobby_router)
 app.include_router(game_router)
 app.include_router(auth_router)
 app.include_router(ws_router)
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse(r"GUI\static\favicon.ico")
 
 
 if __name__ == "__main__":

@@ -16,8 +16,9 @@ def coords_to_pos(col: int, row: int) -> Square:
 
 
 class Piece:
-    def __init__(self, piece_id: str, owner: str, piece_type: str, force: int):
+    def __init__(self, piece_id: str, color: str, owner: str, piece_type: str, force: int):
         self.piece_id = piece_id
+        self.color = color
         self.owner = owner
         self.piece_type = piece_type
         self.force = force
@@ -25,6 +26,7 @@ class Piece:
     def to_dict(self) -> dict:
         return {
             "id": self.piece_id,
+            "color": self.color,
             "owner": self.owner,
             "type": self.piece_type,
             "force": self.force,
@@ -36,6 +38,7 @@ class Board:
     Plateau extensible (jusqu'à 12x12).
     Ne contient AUCUNE règle de déplacement.
     """
+
     # TODO : à voir si avec l'ajout de cases ça ne casse pas tout
 
     def __init__(self, width: int = 8, height: int = 8):
@@ -61,7 +64,7 @@ class Board:
         if not self.is_inside(square):
             return None
         return self._grid.get(square)
-    
+
     def get_square(self, piece_id: str) -> Square:
         for square, piece in self._grid.items():
             if piece is not None and piece.piece_id == piece_id:
@@ -128,8 +131,6 @@ class Board:
             "width": self.width,
             "height": self.height,
             "pieces": {
-                pos: piece.to_dict()
-                for pos, piece in self._grid.items()
-                if piece is not None
+                pos: piece.to_dict() for pos, piece in self._grid.items() if piece is not None
             },
         }

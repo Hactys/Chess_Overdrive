@@ -18,7 +18,7 @@ manager = GameManager()
 def create_game():
     data = request.json
     game_id = data["game_id"]
-    players = data["players"]  # {"white": {...}, "black": {...}}
+    players = data["players"]  # {"uuid-1": {...}, "uuid-2": {...}}
 
     game = manager.create_game(game_id, players)
     return jsonify({"status": "ok", "game_id": game_id})
@@ -50,10 +50,13 @@ def handle_action(data):
 
 
 @socketio.on("get_legal_moves")
-def ws_legal_moves(data):
+def ws_legal_moves(data: dict):
     game_id = data["game_id"]
     pos = data["from"]
-    player = data.get("player", "white")
+    player_id = data.get("player", None)
+
+    if player_id is None:
+        raise ValueError("No player_id given.")
 
     game = manager.get_game(game_id)
     board = game.state.board
@@ -62,7 +65,7 @@ def ws_legal_moves(data):
     if attacker is None:
         return
 
-    moves = game.get_legal_moves(player, pos)
+    moves = game.get_legal_moves(player_id, pos)
     capture_probas = {}
 
     for pos in moves:

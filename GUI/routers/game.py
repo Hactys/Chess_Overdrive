@@ -19,9 +19,6 @@ from GUI.services.state_cache import (
 
 router = APIRouter()
 
-# ⚠️ TEMPORAIRE — sera remplacé par session / auth
-DEFAULT_PLAYER_ID = "white"  # TODO : True player id
-
 
 @router.get("/game/{game_id}")
 async def game_page(request: Request, game_id: str, user: Users = Depends(get_current_user)):
@@ -37,7 +34,7 @@ async def game_page(request: Request, game_id: str, user: Users = Depends(get_cu
 async def get_board(request: Request, game_id: str, user: Users = Depends(get_current_user)):
     state = await get_state(game_id)
     moves, probas = await get_moves(game_id)
-    selected = await get_selected(game_id, DEFAULT_PLAYER_ID)
+    selected = await get_selected(game_id, user.id)
 
     return render_board(
         request, game_id, state, selected=selected, legal_moves=moves, capture_probas=probas
@@ -45,10 +42,13 @@ async def get_board(request: Request, game_id: str, user: Users = Depends(get_cu
 
 
 @router.post("/game/{game_id}/click/{pos}", response_class=HTMLResponse)
-async def click_square(request: Request, game_id: str, pos: str):
+async def click_square(
+    request: Request, game_id: str, pos: str, user: Users = Depends(get_current_user)
+):
+    player_id = str(user.id)
     state = await get_state(game_id)
     moves, probas = await get_moves(game_id)
-    selected = await get_selected(game_id, DEFAULT_PLAYER_ID)
+    selected = await get_selected(game_id, player_id)
 
     if not state:
         return render_board(request, game_id, None)
@@ -57,7 +57,7 @@ async def click_square(request: Request, game_id: str, pos: str):
 
     # Premier clic -> sélection + demande coups légaux
     if selected is None:
-        await set_selected(game_id, DEFAULT_PLAYER_ID, pos)
+        await set_selected(game_id, player_id, pos)
         await sio.emit(
             "get_legal_moves",
             {"game_id": game_id, "from": pos, "player": current_player},
@@ -71,21 +71,21 @@ async def click_square(request: Request, game_id: str, pos: str):
         await sio.emit(
             "action", {"game_id": game_id, "action": {"type": "move", "from": selected, "to": pos}}
         )
-        await set_selected(game_id, DEFAULT_PLAYER_ID, None)
+        await set_selected(game_id, player_id, None)
         await clear_moves(game_id)
         await clear_proba(game_id)
         return render_board(request, game_id, state)
 
     # Second clic sur une autre pièce -> changer sélection
     if pos in state["board"]["pieces"]:
-        await set_selected(game_id, DEFAULT_PLAYER_ID, pos)
+        await set_selected(game_id, player_id, pos)
         await sio.emit(
             "get_legal_moves", {"game_id": game_id, "from": pos, "player": current_player}
         )
         return render_board(request, game_id, state, selected=pos)
 
     # Clic sur case vide non jouable -> clear sélection
-    await set_selected(game_id, DEFAULT_PLAYER_ID, None)
+    await set_selected(game_id, player_id, None)
     await clear_moves(game_id)
     return render_board(request, game_id, state)
 

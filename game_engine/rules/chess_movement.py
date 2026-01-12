@@ -7,14 +7,14 @@ from game_engine.core.events import MovesGenerateEvent
 
 class MoveRule(Protocol):
     """Interface pour TOUTES les règles de déplacement.
-      Chaque règle peut ajouter, filtrer ou modifier des déplacements.
+    Chaque règle peut ajouter, filtrer ou modifier des déplacements.
     """
+
     def generate(self, state: GameState, from_pos: Square, piece: Piece) -> List[Square]:
         return []
-    
+
     def on_generate(self, event: MovesGenerateEvent, state: GameState):
         return
-
 
 
 class ChessMovementRule(MoveRule):  # mouvements classiques d'échecs
@@ -23,28 +23,30 @@ class ChessMovementRule(MoveRule):  # mouvements classiques d'échecs
         board = state.board
         fx, fy = pos_to_coords(from_pos)
 
-        def add(dx,dy,repeat=False):
-            cx, cy = fx+dx, fy+dy
-            while board.is_inside(pos:=coords_to_pos(cx,cy)):
+        def add(dx, dy, repeat=False):
+            cx, cy = fx + dx, fy + dy
+            while board.is_inside(pos := coords_to_pos(cx, cy)):
                 target = board.get_piece(pos)
                 if target:
                     if target.owner != piece.owner:
                         moves.append(pos)
                     break
                 moves.append(pos)
-                if not repeat: 
+                if not repeat:
                     break
                 cx += dx
                 cy += dy
 
-        p=piece.piece_type.lower()
+        p = piece.piece_type.lower()
         if p == "pawn":  # TODO : En passant
-            direction = 1 if piece.owner=="white" else -1
-            start_row = 1 if piece.owner == "white" else 6
+            direction = 1 if piece.color == "white" else -1
+            start_row = 1 if piece.color == "white" else 6
             forward1 = coords_to_pos(fx, fy + direction)  # Case devant
             if board.is_inside(forward1) and not board.get_piece(forward1):
                 moves.append(forward1)
-                forward2 = coords_to_pos(fx, fy + 2*direction)  # Avancée de 2 si sur case de départ
+                forward2 = coords_to_pos(
+                    fx, fy + 2 * direction
+                )  # Avancée de 2 si sur case de départ
                 if fy == start_row and board.is_inside(forward2) and not board.get_piece(forward2):
                     moves.append(forward2)
             for dx in (-1, 1):  # Captures diagonales
@@ -54,36 +56,36 @@ class ChessMovementRule(MoveRule):  # mouvements classiques d'échecs
                     if t and t.owner != piece.owner:
                         moves.append(cap)
 
-        if p=="rook":   
-            add(1,0,True)
-            add(-1,0,True)
-            add(0,1,True)
-            add(0,-1,True)
-        if p=="bishop": 
-            add(1,1,True)
-            add(1,-1,True)
-            add(-1,1,True)
-            add(-1,-1,True)
-        if p=="queen":
-            add(1,0,True)
-            add(-1,0,True)
-            add(0,1,True)
-            add(0,-1,True)
-            add(1,1,True)
-            add(1,-1,True)
-            add(-1,1,True)
-            add(-1,-1,True)
-        if p=="king":
-            for dx in (-1,0,1):
-                for dy in (-1,0,1):
+        if p == "rook":
+            add(1, 0, True)
+            add(-1, 0, True)
+            add(0, 1, True)
+            add(0, -1, True)
+        if p == "bishop":
+            add(1, 1, True)
+            add(1, -1, True)
+            add(-1, 1, True)
+            add(-1, -1, True)
+        if p == "queen":
+            add(1, 0, True)
+            add(-1, 0, True)
+            add(0, 1, True)
+            add(0, -1, True)
+            add(1, 1, True)
+            add(1, -1, True)
+            add(-1, 1, True)
+            add(-1, -1, True)
+        if p == "king":
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
                     if dx or dy:
-                        add(dx,dy)
-        if p=="knight":
-            for dx,dy in [(2,1),(2,-1),(-2,1),(-2,-1),(1,2),(1,-2),(-1,2),(-1,-2)]:
-                add(dx,dy)
+                        add(dx, dy)
+        if p == "knight":
+            for dx, dy in [(2, 1), (2, -1), (-2, 1), (-2, -1), (1, 2), (1, -2), (-1, 2), (-1, -2)]:
+                add(dx, dy)
 
         return moves
-    
+
     def on_generate(self, event: MovesGenerateEvent, state: GameState):
         piece = state.board.get_piece(event.from_pos)
         if not piece or piece.piece_id != event.piece_id:
@@ -95,54 +97,60 @@ class ChessMovementRule(MoveRule):  # mouvements classiques d'échecs
 
 class SpectralRule(MoveRule):
     """une pièce Spectrale ignore les collisions MAIS ne capture pas."""
+
     def on_generate(self, event: MovesGenerateEvent, state: GameState):
         piece = state.board.get_piece(event.from_pos)
         if not piece or piece.piece_id != event.piece_id:
             return
 
-        if not any(e.effect_id == "spectral" and e.target_id == piece.piece_id 
-                   for e in state.active_effects):
+        if not any(
+            e.effect_id == "spectral" and e.target_id == piece.piece_id
+            for e in state.active_effects
+        ):
             return
 
         moves = []
         board = state.board
         fx, fy = pos_to_coords(event.from_pos)
 
-        def add(dx,dy):
-            cx, cy = fx+dx, fy+dy
-            while board.is_inside(pos:=coords_to_pos(cx,cy)):
+        def add(dx, dy):
+            cx, cy = fx + dx, fy + dy
+            while board.is_inside(pos := coords_to_pos(cx, cy)):
                 target = board.get_piece(pos)
-                if target is None :
+                if target is None:
                     moves.append(pos)
                 cx += dx
                 cy += dy
 
         p = piece.piece_type.lower()
-        if p=="rook":   
-            add(1,0)
-            add(-1,0)
-            add(0,1)
-            add(0,-1)
-        elif p=="bishop": 
-            add(1,1)
-            add(1,-1)
-            add(-1,1)
-            add(-1,-1)
-        elif p=="queen":
-            add(1,0); add(-1,0)
-            add(0,1); add(0,-1)
-            add(1,1); add(1,-1)
-            add(-1,1); add(-1,-1)
+        if p == "rook":
+            add(1, 0)
+            add(-1, 0)
+            add(0, 1)
+            add(0, -1)
+        elif p == "bishop":
+            add(1, 1)
+            add(1, -1)
+            add(-1, 1)
+            add(-1, -1)
+        elif p == "queen":
+            add(1, 0)
+            add(-1, 0)
+            add(0, 1)
+            add(0, -1)
+            add(1, 1)
+            add(1, -1)
+            add(-1, 1)
+            add(-1, -1)
         else:
             return
         event.moves[:] = moves
 
 
-
 # Garder ça après les class de règles.
 MOVE_RULES: List[MoveRule] = [
     ChessMovementRule(),
-    SpectralRule(),      # autres règles se plug ici
+    SpectralRule(),  # autres règles se plug ici
 ]
 
 
@@ -173,11 +181,13 @@ def is_legal_move(state: GameState, from_pos: Square, to_pos: Square) -> bool:
     ptype = piece.piece_type.lower()
 
     if ptype == "pawn":  # TODO : rajouter l'implémentation pour la gravité inversée
-        direction = 1 if piece.owner == "white" else -1
-        start_row = 1 if piece.owner == "white" else 6
-        if dx == 0 and dy == direction and target is None: # Avancée simple
+        direction = 1 if piece.color == "white" else -1
+        start_row = 1 if piece.color == "white" else 6
+        if dx == 0 and dy == direction and target is None:  # Avancée simple
             return True
-        if dx == 0 and dy == 2 * direction and target is None and fy == start_row: # Avancée double depuis la ligne de départ
+        if (
+            dx == 0 and dy == 2 * direction and target is None and fy == start_row
+        ):  # Avancée double depuis la ligne de départ
             # chemin vérifié plus tard via PathCheckEvent + get_path
             return True
         if abs(dx) == 1 and dy == direction and target is not None:  # Capture diagonale

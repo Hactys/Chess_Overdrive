@@ -28,7 +28,7 @@
                 {% if probas and pos in probas %}outline:4px solid {{ probas[pos] | probacolor }};{% endif %}
              ">
             {% if piece %}
-            <img src="/static/pieces/{{ PIECE_IMAGE_MAP[(piece.owner, piece.type)] }}"
+            <img src="/static/pieces/{{ PIECE_IMAGE_MAP[(piece.color, piece.type)] }}"
                  style="width:48px;pointer-events:none;z-index:1">
             {% endif %}
             {% if pos in probas%}

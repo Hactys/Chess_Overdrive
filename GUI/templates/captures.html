@@ -1,9 +1,9 @@
-<h3>Captures</h3>
+<h2>Captures</h2>
 {% if not state %}En attente...{% else %}
 <div style="display:flex;gap:8px;">
-    {% for p,pdata in state["players"].items() %}
+    {% for pid, pdata in state["players"].items() %}
         <div>
-            <b>{{ p }}</b><br>
+            <b>{{ pdata.username }}</b><br>
             {% if pdata.get("captures") %}
                 {% for c in pdata.captures %}
                     <img src="/static/pieces/{{ c }}.svg" width="30">

@@ -27,13 +27,19 @@ async def lobby(request: Request, user: Users = Depends(get_current_user)):
 async def create_game(user: Users = Depends(get_current_user)):
     game_id = str(uuid.uuid4())[:8]  # TODO : quand on aura des ids de joueur il faudra faire une
     # génération en fonction des ids des deux joueurs et du temps
-    player_id = "white"  # TODO : à changer quand on aura des ids de joueurs
+    player_id = str(user.id)
 
     # Création côté moteur
     try:
         requests.post(
             f"{ENGINE_HTTP}/create",
-            json={"game_id": game_id, "players": {"white": {}, "black": {}}},
+            json={
+                "game_id": game_id,
+                "players": {
+                    player_id: {"username": f"{user.username}#{user.disambiguator}"},
+                    "black": {"username": "TODO"},
+                },
+            },  # TODO : rajouter une logique pour que black soit aussi un player_id
         )
         print(f"🆕 Partie créée : {game_id}")
     except Exception as e:
@@ -47,7 +53,7 @@ async def create_game(user: Users = Depends(get_current_user)):
 
 @router.post("/join/{game_id}")
 async def join_existing_game(game_id: str, user: Users = Depends(get_current_user)):
-    player_id = "white"  # TODO : à changer quand on aura des ids de joueurs
+    player_id = str(user.id)
     await join_game(game_id, player_id)
     return RedirectResponse(
         url=f"/game/{game_id}",
