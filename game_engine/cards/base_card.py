@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from game_engine.core.state import GameState  
+    from game_engine.core.state import GameState
 
 
 class CardInstance:
@@ -15,9 +15,7 @@ class BaseCard(ABC):
     cost_overdrive: float
 
     @abstractmethod
-    def can_play(self, state: GameState, targets: dict) -> bool:
-        ...
+    def can_play(self, state: GameState, targets: dict) -> bool: ...
 
     @abstractmethod
-    def play(self, state: GameState, targets: dict) -> None:
-        ...
+    def play(self, state: GameState, targets: dict) -> None: ...

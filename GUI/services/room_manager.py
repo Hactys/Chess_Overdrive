@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+
 class RoomManager:
     def __init__(self):
         # game_id -> set(WebSocket)

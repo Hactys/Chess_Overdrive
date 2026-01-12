@@ -8,6 +8,7 @@ class GameEvent:
     Événement de base.
     Tous les événements du moteur en héritent.
     """
+
     name: str = field(init=False)
     payload: Dict[str, Any] = field(default_factory=dict)
 
@@ -21,6 +22,7 @@ class GameEvent:
 
 
 # ÉVÉNEMENTS DE JEU
+
 
 @dataclass
 class MoveAttemptEvent(GameEvent):
@@ -45,12 +47,14 @@ class MovesGenerateEvent(GameEvent):
     """
     Étape 1 : génération brute des coups possibles
     """
+
     from_pos: str = ""
     piece_id: str = ""
     moves: list[str] = field(default_factory=list)
 
 
 # COMBAT
+
 
 @dataclass
 class CombatCalculateEvent(GameEvent):
@@ -75,6 +79,7 @@ class CombatResolvedEvent(GameEvent):
 
 # TOURS
 
+
 @dataclass
 class TurnStartEvent(GameEvent):
     player_id: str = ""
@@ -96,14 +101,16 @@ class OverdriveChangedEvent(GameEvent):
 class TriggerOverloadEvent(GameEvent):
     player_id: str = ""
     probability: float = 0.0
-    triggered: bool = False    # définit si l'entrée en overload a eu lieu
+    triggered: bool = False  # définit si l'entrée en overload a eu lieu
 
 
 @dataclass
 class OverloadExplosionEvent(GameEvent):
     player_id: str = ""
-    piece_id: str = ""          # pièce détruite par l’explosion
-    destroyed: list[str] = field(default_factory=list)  # list des pièces adjacentes détruites incluses
+    piece_id: str = ""  # pièce détruite par l’explosion
+    destroyed: list[str] = field(
+        default_factory=list
+    )  # list des pièces adjacentes détruites incluses
 
 
 @dataclass

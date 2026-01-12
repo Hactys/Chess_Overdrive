@@ -1,11 +1,15 @@
 import pytest
 
 from GUI.services.state_cache import (
-    set_state, get_state,
-    set_moves, get_moves,
-    set_selected, get_selected,
-    clear_moves
+    set_state,
+    get_state,
+    set_moves,
+    get_moves,
+    set_selected,
+    get_selected,
+    clear_moves,
 )
+
 
 @pytest.mark.asyncio
 async def test_state_roundtrip():

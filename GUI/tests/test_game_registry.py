@@ -2,6 +2,7 @@ import pytest
 from GUI.services.game_registry import register_game, list_games, join_game
 from GUI.ws_game_client import sio
 
+
 @pytest.mark.asyncio
 async def test_register_and_list_game(monkeypatch):
     async def fake_emit(event, data):

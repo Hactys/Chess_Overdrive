@@ -21,18 +21,16 @@ def calculate_combat_proba(game: Game, attacker: Piece, defender: Piece) -> floa
     a = 1.25
 
     calc_event = CombatCalculateEvent(
-                    attacker_id=attacker.piece_id,
-                    defender_id=defender.piece_id,
-                    x=x, y=y, k=k, a=a
-                )
+        attacker_id=attacker.piece_id, defender_id=defender.piece_id, x=x, y=y, k=k, a=a
+    )
     event_bus.emit(calc_event, state)
     if calc_event.cancelled:
         return -1  # TODO : need to completly handle this case, temporary fix
-    
+
     x, y, k, a = calc_event.x, calc_event.y, calc_event.k, calc_event.a
 
     exponent = -k * (math.sqrt(x) - math.sqrt(y) + a)
-    probability =  1.0 / (1.0 + math.exp(exponent))
+    probability = 1.0 / (1.0 + math.exp(exponent))
 
     return probability
 
@@ -51,7 +49,7 @@ def resolve_combat(game: Game, attacker: Piece, defender: Piece) -> bool:
         attacker_id=attacker.piece_id,
         defender_id=defender.piece_id,
         success=success,
-        probability=probability
+        probability=probability,
     )
     game.state.event_bus.emit(resolve_event, game.state)
 
@@ -60,7 +58,7 @@ def resolve_combat(game: Game, attacker: Piece, defender: Piece) -> bool:
 
         attacker_square = game.state.board.get_square(attacker.piece_id)
         defender_square = game.state.board.get_square(defender.piece_id)
-        if success :  # Défenseur détruit
+        if success:  # Défenseur détruit
             game.state.board.remove_piece(defender_square)
             return True
         # Attaquant détruit

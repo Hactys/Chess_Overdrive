@@ -68,16 +68,12 @@ class GameState:
             "players": {pid: player.to_dict() for pid, player in self.players.items()},
             "board": self.board.to_dict(),
             "active_effects": [
-                {
-                    "effect_id": e.effect_id,
-                    "expires_at_turn": e.expires_at_turn
-                }
+                {"effect_id": e.effect_id, "expires_at_turn": e.expires_at_turn}
                 for e in self.active_effects
             ],
             "active_traps": list(self.active_traps.keys()),
             "rng_seed": self.rng.seed,
             "overload_info": {
-                pid: overload_probability(player.overdrive)
-                for pid, player in self.players.items()
-            }
+                pid: overload_probability(player.overdrive) for pid, player in self.players.items()
+            },
         }

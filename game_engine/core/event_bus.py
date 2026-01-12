@@ -2,8 +2,9 @@ from typing import Callable, Dict, List, Type, Tuple, TYPE_CHECKING
 from collections import defaultdict
 
 from .events import GameEvent
+
 if TYPE_CHECKING:
-    from game_engine.core.state import GameState  
+    from game_engine.core.state import GameState
 
 
 EventHandler = Callable[[GameEvent, "GameState"], None]
@@ -17,15 +18,14 @@ class EventBus:
     - Permet modification / annulation des événements
     - Ordre déterministe
     """
+
     def __init__(self):
         # event_type -> list[(priority, handler)]
-        self._handlers: Dict[
-            Type[GameEvent],
-            List[Tuple[int, EventHandler]]
-        ] = defaultdict(list)
+        self._handlers: Dict[Type[GameEvent], List[Tuple[int, EventHandler]]] = defaultdict(list)
 
-    def subscribe(self, event_type: Type[GameEvent], 
-                        handler: EventHandler, priority: int = 0) -> None:
+    def subscribe(
+        self, event_type: Type[GameEvent], handler: EventHandler, priority: int = 0
+    ) -> None:
         """
         Inscrit un handler sur un type d'événement.
         Plus la priorité est élevée, plus le handler est appelé tôt.

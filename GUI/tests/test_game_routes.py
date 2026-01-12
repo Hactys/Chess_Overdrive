@@ -22,7 +22,7 @@ def test_board_with_state(client):
                 "current_player": "white",
                 "players": {},
                 "board": {"pieces": {"e2": {"owner": "white", "type": "pawn"}}},
-            }
+            },
         )
     )
 

@@ -6,6 +6,7 @@ class NoAction(BaseAction):
     """
     Tell the game to do nothing.
     """
+
     def __init__(self):
         return
 

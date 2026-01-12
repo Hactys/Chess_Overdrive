@@ -76,4 +76,4 @@ async def favicon():
 
 if __name__ == "__main__":
     print("🚀 Chess Overdrive GUI → http://localhost:8000")
-    uvicorn.run("GUI.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("GUI.main:app", host="0.0.0.0", port=8000, reload=False)

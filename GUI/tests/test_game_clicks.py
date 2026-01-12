@@ -20,7 +20,7 @@ def test_first_click_selects_piece(client, monkeypatch):
                 "current_player": "white",
                 "players": {},
                 "board": {"pieces": {"e2": {"owner": "white", "type": "pawn"}}},
-            }
+            },
         )
     )
 

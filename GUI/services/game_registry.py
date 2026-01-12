@@ -11,12 +11,14 @@ _lock = asyncio.Lock()
 #   "players": set(),
 # }
 
+
 async def register_game(game_id: str):
     async with _lock:
         _games[game_id] = {
             "created_at": datetime.now(timezone.utc),
             "players": set(),
         }
+
 
 async def list_games():
     async with _lock:

@@ -29,7 +29,7 @@ class MoveAction(BaseAction):
     def execute(self, game: Game) -> None:
         """
         Pipeline pour le déroulement de l'execution d'une action de mouvement.
-        
+
         :param state: Current state of the game
         :type state: GameState
         """
@@ -44,9 +44,7 @@ class MoveAction(BaseAction):
 
         # Move attempt
         move_event = MoveAttemptEvent(
-            from_pos=self.from_pos,
-            to_pos=self.to_pos,
-            piece_id=piece.piece_id
+            from_pos=self.from_pos, to_pos=self.to_pos, piece_id=piece.piece_id
         )
         event_bus.emit(move_event, state)
         if move_event.cancelled:
@@ -79,14 +77,10 @@ class MoveAction(BaseAction):
         board.move_piece(self.from_pos, self.to_pos)
 
         # Pièce arrivée
-        landed_event = PieceLandedEvent(
-            position=self.to_pos,
-            piece_id=piece.piece_id
-        )
+        landed_event = PieceLandedEvent(position=self.to_pos, piece_id=piece.piece_id)
         event_bus.emit(landed_event, state)
 
         # Passage au tour de l'adversaire
         game.end_turn()
-
 
         # Fin de l’action

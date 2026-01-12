@@ -11,7 +11,6 @@ Responsabilités :
 ⚠️ Aucune logique UI ici
 """
 
-
 import socketio
 import asyncio
 
@@ -19,8 +18,8 @@ from GUI.services.room_manager import room_manager
 from GUI.services.state_cache import set_state, set_moves
 
 
-ENGINE_HTTP = "http://localhost:5000"   # Endpoint REST du moteur
-ENGINE_WS   = "http://localhost:5000"   # Socket.io endpoint
+ENGINE_HTTP = "http://localhost:5000"  # Endpoint REST du moteur
+ENGINE_WS = "http://localhost:5000"  # Socket.io endpoint
 
 
 sio = socketio.AsyncClient()
@@ -44,6 +43,7 @@ async def init_connection():
 #     print("🟢 [WS] Connecté au moteur")
 #     await sio.emit("join", {"game_id": GAME_ID, "player": PLAYER})
 #     print(f"📡 Join envoyé pour game '{GAME_ID}' en tant que '{PLAYER}'")
+
 
 @sio.event
 async def connect_error(data):

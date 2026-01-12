@@ -10,6 +10,7 @@ class BaseAction(ABC):
     Action abstraite du moteur.
     Toute interaction joueur → moteur passe par une Action.
     """
+
     @abstractmethod
     def validate(self, game: Game) -> bool:
         """

@@ -17,17 +17,16 @@ def gain_overdrive_generic(state: GameState, player_id: str, cause: str, amount:
     """
     if amount == 0:
         return
-    
+
     player = state.get_player(player_id)
     event = OverdriveChangedEvent(
-        player_id=player_id, delta=amount, 
-        new_value=player.overdrive + amount
-        )
+        player_id=player_id, delta=amount, new_value=player.overdrive + amount
+    )
     event.payload["cause"] = cause
 
     event = OverdriveChangedEvent(player_id=player_id, delta=amount, new_value=player.overdrive)
     state.event_bus.emit(event, state)
-    
+
     if not event.cancelled:
         player.overdrive += amount
 
@@ -48,12 +47,15 @@ def spend_overdrive(state: GameState, player_id: str, amount: float) -> bool:
 
 # GAMEPLAY UTILS
 
-def gain_overdrive_from_attack(state: GameState, player_id: str, success_probability: float, success: bool):
+
+def gain_overdrive_from_attack(
+    state: GameState, player_id: str, success_probability: float, success: bool
+):
     """
     Gain proportionnel au risque.
     - Plus le coup était risqué, plus on gagne.
     - 1/(1 - p) si réussite, 1/p si échec → récompense l'audace et équilibre le hasard.
-    
+
     Exemple :
         p = 0.2 → si réussite -> +0.8  / si échec -> +0.2
         p = 0.7 → si réussite -> +0.3  / si échec -> +0.7
@@ -65,7 +67,7 @@ def gain_overdrive_from_attack(state: GameState, player_id: str, success_probabi
     p = max(min(p, 0.9999), 0.0001)  # évite divisions extrêmes
 
     if success:
-        amount = 1 / p ** 1.5 * OVERDRIVE_MULTIPLIER
+        amount = 1 / p**1.5 * OVERDRIVE_MULTIPLIER
     else:
         amount = 1 / (1.0 - p) ** 1.5 * OVERDRIVE_MULTIPLIER
 

@@ -9,10 +9,10 @@ from game_engine.rules.chess_movement import MOVE_RULES, ChessMovementRule, Spec
 
 def get_moves_for_piece(state, from_pos):
     piece = state.board.get_piece(from_pos)
-    if not piece: 
+    if not piece:
         return []
-    
-    moves=[]
+
+    moves = []
     for rule in MOVE_RULES:
         moves += rule.generate(state, from_pos, piece)
     return list(set(moves))
@@ -25,10 +25,10 @@ class Game:
     - Gère les tours
     - Centralise l'EventBus
     """
-    def __init__(self, state: GameState, event_bus: EventBus, 
-                 player_order: List[PlayerID]):
+
+    def __init__(self, state: GameState, event_bus: EventBus, player_order: List[PlayerID]):
         """
-        player_order définit l'ordre de jeu (ex: ["white", "black"]) à remplacer par les IDs
+        player_order définit l'ordre de jeu (ex: ["uuid-white", "uuid-black"])
         """
         self.state = state
         self.event_bus = event_bus
@@ -39,12 +39,11 @@ class Game:
 
         self.state.event_bus = event_bus  # Injection du bus dans l'état (choix volontaire)
         self.register_move_rules()
-    
+
     def register_move_rules(self):
         bus = self.event_bus
-        bus.subscribe(MovesGenerateEvent, ChessMovementRule().on_generate, priority=0) # type: ignore
-        bus.subscribe(MovesGenerateEvent, SpectralRule().on_generate, priority=-10) # type: ignore
-
+        bus.subscribe(MovesGenerateEvent, ChessMovementRule().on_generate, priority=0)  # type: ignore
+        bus.subscribe(MovesGenerateEvent, SpectralRule().on_generate, priority=-10)  # type: ignore
 
     def start_turn(self) -> None:
         """
@@ -90,14 +89,13 @@ class Game:
 
     def get_turn(self) -> int:
         return self.state.turn
-    
+
     def get_legal_moves(self, player_id: str, from_pos: str) -> list[str]:
         """Renvoie tous les mouvements autorisés par les règles."""
         piece = self.state.board.get_piece(from_pos)
         if not piece or piece.owner != player_id:
             return []
 
-        moves = []
         gen_event = MovesGenerateEvent(
             from_pos=from_pos,
             piece_id=piece.piece_id,

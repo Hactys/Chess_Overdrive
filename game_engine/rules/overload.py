@@ -5,7 +5,7 @@ from game_engine.core.events import (
     TriggerOverloadEvent,
     OverloadExplosionEvent,
     EndOverloadEvent,
-    TurnStartEvent
+    TurnStartEvent,
 )
 
 if TYPE_CHECKING:
@@ -20,7 +20,9 @@ def overload_probability(overdrive: float) -> float:
         return 0
     a = 1.962610507
     x = overdrive / 100.0
-    return min(1.0, math.atan(a * (x - 1)) * (2 / math.pi))  # normalement le min n'est pas nécessaire
+    return min(
+        1.0, math.atan(a * (x - 1)) * (2 / math.pi)
+    )  # normalement le min n'est pas nécessaire
 
 
 def handle_overload_start(event: TurnStartEvent, state: GameState):
@@ -28,7 +30,7 @@ def handle_overload_start(event: TurnStartEvent, state: GameState):
     player = state.get_player(event.player_id)
 
     # calcul de probabilité
-    p = overload_probability(player.overdrive) 
+    p = overload_probability(player.overdrive)
 
     trigger_event = TriggerOverloadEvent(player_id=player.player_id, probability=p)
     state.event_bus.emit(trigger_event, state)
@@ -50,8 +52,11 @@ def overload_explosion(state: GameState, player_id: str):
     player = state.get_player(player_id)
 
     # Sélection d'une pièce aléatoire
-    pieces = [(pos, piece) for pos, piece in state.board._grid.items()
-              if piece and piece.owner == player_id]
+    pieces = [
+        (pos, piece)
+        for pos, piece in state.board._grid.items()
+        if piece and piece.owner == player_id
+    ]
 
     if not pieces:
         return  # aucun effet si plus de pièce

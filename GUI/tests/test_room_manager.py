@@ -1,6 +1,7 @@
 import pytest
 from GUI.services.room_manager import RoomManager
 
+
 class FakeWebSocket:
     def __init__(self):
         self.messages = []

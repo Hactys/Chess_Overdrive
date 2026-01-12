@@ -22,7 +22,7 @@ def test_ws_sends_initial_update_when_state_exists(client):
                 "current_player": "white",
                 "players": {},
                 "board": {"pieces": {}},
-            }
+            },
         )
     )
 
