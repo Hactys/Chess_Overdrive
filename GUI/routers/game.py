@@ -55,6 +55,12 @@ async def click_square(
 
     current_player = state["current_player"]
 
+    if player_id not in state["players"].keys():
+        print(f"click_square : {player_id} not in {state['players'].key()}")
+        return render_board(request, game_id, state)
+    if player_id != current_player:
+        return render_board(request, game_id, state)
+
     # Premier clic -> sélection + demande coups légaux
     if selected is None:
         await set_selected(game_id, player_id, pos)
@@ -69,7 +75,12 @@ async def click_square(
     # Second clic + coup valide
     if moves and pos in moves:
         await sio.emit(
-            "action", {"game_id": game_id, "action": {"type": "move", "from": selected, "to": pos}}
+            "action",
+            {
+                "game_id": game_id,
+                "player_id": player_id,
+                "action": {"type": "move", "from": selected, "to": pos},
+            },
         )
         await set_selected(game_id, player_id, None)
         await clear_moves(game_id)
@@ -79,9 +90,7 @@ async def click_square(
     # Second clic sur une autre pièce -> changer sélection
     if pos in state["board"]["pieces"]:
         await set_selected(game_id, player_id, pos)
-        await sio.emit(
-            "get_legal_moves", {"game_id": game_id, "from": pos, "player": current_player}
-        )
+        await sio.emit("get_legal_moves", {"game_id": game_id, "from": pos, "player": player_id})
         return render_board(request, game_id, state, selected=pos)
 
     # Clic sur case vide non jouable -> clear sélection

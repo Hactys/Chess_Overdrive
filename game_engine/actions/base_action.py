@@ -11,6 +11,9 @@ class BaseAction(ABC):
     Toute interaction joueur → moteur passe par une Action.
     """
 
+    def __init__(self, player_id: str):
+        self.player_id = player_id
+
     @abstractmethod
     def validate(self, game: Game) -> bool:
         """

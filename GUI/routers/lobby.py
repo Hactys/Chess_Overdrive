@@ -1,7 +1,7 @@
 import uuid
 import requests
 
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import RedirectResponse
 
 from GUI.db.models.user import Users
@@ -35,13 +35,10 @@ async def create_game(user: Users = Depends(get_current_user)):
             f"{ENGINE_HTTP}/create",
             json={
                 "game_id": game_id,
-                "players": {
-                    player_id: {"username": f"{user.username}#{user.disambiguator}"},
-                    "black": {"username": "TODO"},
-                },
+                "players": {player_id: {"username": f"{user.username}#{user.disambiguator}"}},
             },  # TODO : rajouter une logique pour que black soit aussi un player_id
         )
-        print(f"🆕 Partie créée : {game_id}")
+        print(f"🆕 Partie créée (en attente) : {game_id}")
     except Exception as e:
         print("❌ Erreur création partie moteur :", e)
 
@@ -54,8 +51,24 @@ async def create_game(user: Users = Depends(get_current_user)):
 @router.post("/join/{game_id}")
 async def join_existing_game(game_id: str, user: Users = Depends(get_current_user)):
     player_id = str(user.id)
+    try:
+        response = requests.post(
+            f"{ENGINE_HTTP}/join",
+            json={
+                "game_id": game_id,
+                "player": {
+                    "player_id": player_id,
+                    "username": f"{user.username}#{user.disambiguator}",
+                },
+            },
+        )
+    except Exception as e:
+        print("❌ Erreur join partie moteur :", e)
+        return HTTPException(status_code=400, detail="Erreur join partie moteur.")
+    if "status" in response.json():
+        if not (response.json())["status"] == "ok":  # type: ignore
+            return HTTPException(status_code=400, detail="Game already has two players")
+    else:
+        print(f"⚠️ no 'status' in response.json() : {response.json()}")
     await join_game(game_id, player_id)
-    return RedirectResponse(
-        url=f"/game/{game_id}",
-        status_code=303,
-    )
+    return RedirectResponse(url=f"/game/{game_id}", status_code=303)

@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from flask_socketio import SocketIO, join_room, emit
+from flask_socketio import SocketIO, join_room
 
 from game_engine.rules.combat import calculate_combat_proba
 from game_engine.server.game_manager import GameManager
@@ -24,24 +24,51 @@ def create_game():
     return jsonify({"status": "ok", "game_id": game_id})
 
 
+@app.route("/join", methods=["POST"])
+def join_game():
+    data = request.json
+    if not data:
+        return jsonify({"error": "missing json body"}), 400
+    game_id = data.get("game_id")
+    player = data.get("player")
+
+    if not game_id or not player:
+        return jsonify({"error": "invalid payload"}), 400
+    player_id = player.get("player_id")
+    username = player.get("username")
+    if not player_id:
+        return jsonify({"error": "missing player_id"}), 400
+    game = manager.games.get(game_id)
+    if not game:
+        return jsonify({"error": "game not found"}), 404
+    ok = game.add_player(player_id, username)
+    if not ok:
+        return jsonify({"error": "game already has two players"}), 400
+    return jsonify({"status": "ok"})
+
+
 # WebSocket
 @socketio.on("join")
-def join_game(data):
+def ws_join_game(data):
     game_id = data["game_id"]
     player_id = data["player"]
 
     join_room(game_id)
 
     game = manager.get_game(game_id)
-    emit("state", state_to_dict(game.state), room=game_id)  # type: ignore
+    socketio.emit("state", state_to_dict(game.state), room=game_id)  # type: ignore
 
 
 @socketio.on("action")
-def handle_action(data):
+def ws_handle_action(data):
     game_id = data["game_id"]
     game = manager.get_game(game_id)
+    player_id = data.get("player_id")
+    if not player_id:
+        socketio.emit("error", {"msg": "Missing player_id"}, room=request.sid)  # type: ignore
+        return
 
-    action = parse_action(data["action"])
+    action = parse_action({**data["action"], "player_id": player_id})
 
     if game.apply_action(action):
         socketio.emit("state", state_to_dict(game.state), room=game_id)  # type: ignore
@@ -56,10 +83,21 @@ def ws_legal_moves(data: dict):
     player_id = data.get("player", None)
 
     if player_id is None:
-        raise ValueError("No player_id given.")
+        socketio.emit("error", {"msg": "Missing player_id"}, room=request.sid)  # type: ignore
+        return
 
     game = manager.get_game(game_id)
     board = game.state.board
+
+    if player_id not in game.state.players.keys():
+        socketio.emit("error", {"msg": "Not a player"}, room=request.sid)  # type: ignore
+        return
+    if player_id not in game.state.players:
+        socketio.emit("error", {"msg": "Not a player in this game"}, room=request.sid)  # type: ignore
+        return
+    if player_id != game.state.current_player:
+        socketio.emit("legal_moves", [], room=request.sid)  # type: ignore
+        return
 
     attacker = board.get_piece(pos)
     if attacker is None:
@@ -74,7 +112,7 @@ def ws_legal_moves(data: dict):
             proba = calculate_combat_proba(game, attacker, defender)
             capture_probas[pos] = proba
 
-    emit(
+    socketio.emit(
         "legal_moves_result",
         {"game_id": game_id, "from": pos, "moves": moves, "capture_probas": capture_probas},
         room=game_id,  # type: ignore

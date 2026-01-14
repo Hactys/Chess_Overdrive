@@ -7,8 +7,8 @@ class NoAction(BaseAction):
     Tell the game to do nothing.
     """
 
-    def __init__(self):
-        return
+    def __init__(self, player_id: str):
+        super().__init__(player_id)
 
     def validate(self, game: Game) -> bool:
         return True

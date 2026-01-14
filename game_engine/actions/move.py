@@ -9,7 +9,8 @@ from game_engine.actions.base_action import BaseAction
 
 
 class MoveAction(BaseAction):
-    def __init__(self, from_pos: Square, to_pos: Square):
+    def __init__(self, player_id: str, from_pos: Square, to_pos: Square):
+        super().__init__(player_id)
         self.from_pos = from_pos
         self.to_pos = to_pos
 
@@ -20,7 +21,9 @@ class MoveAction(BaseAction):
 
         if piece is None:
             return False
-        if piece.owner != state.current_player:
+        if self.player_id != state.current_player:
+            return False
+        if piece.owner != self.player_id:
             return False
         if not board.is_inside(self.to_pos):
             return False

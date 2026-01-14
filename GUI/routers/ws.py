@@ -34,6 +34,10 @@ async def ws_game(ws: WebSocket, game_id: str):
     state = await get_state(game_id)
     if state:
         await ws.send_text("update_state")
+        if ws.state.user_id in state["players"]:
+            ws.state.is_player = True
+        else:
+            ws.state.is_player = False
 
     try:
         while True:
