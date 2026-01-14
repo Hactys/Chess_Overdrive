@@ -1,5 +1,3 @@
-# rules/blocking_rules.py
-
 from game_engine.core.events import PathCheckEvent
 from game_engine.core.state import GameState
 

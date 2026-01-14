@@ -1,5 +1,3 @@
-# server/api_actions.py
-
 from game_engine.actions.move import MoveAction
 from game_engine.actions.no_action import NoAction
 
