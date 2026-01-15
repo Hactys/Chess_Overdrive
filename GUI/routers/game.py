@@ -20,6 +20,12 @@ from GUI.services.state_cache import (
 router = APIRouter()
 
 
+def is_black_pov(player_id, state):
+    player = state["players"][player_id]
+    player_ids = list(state["players"].keys())
+    return len(player_ids) == 2 and player_ids[1] == player_id
+
+
 @router.get("/game/{game_id}")
 async def game_page(request: Request, game_id: str, user: Users = Depends(get_current_user)):
     games = await list_games()
@@ -35,9 +41,16 @@ async def get_board(request: Request, game_id: str, user: Users = Depends(get_cu
     state = await get_state(game_id)
     moves, probas = await get_moves(game_id)
     selected = await get_selected(game_id, user.id)
+    black_pov = is_black_pov(str(user.id), state)
 
     return render_board(
-        request, game_id, state, selected=selected, legal_moves=moves, capture_probas=probas
+        request,
+        game_id,
+        state,
+        selected=selected,
+        legal_moves=moves,
+        capture_probas=probas,
+        black_pov=black_pov,
     )
 
 
@@ -49,17 +62,18 @@ async def click_square(
     state = await get_state(game_id)
     moves, probas = await get_moves(game_id)
     selected = await get_selected(game_id, player_id)
+    black_pov = is_black_pov(player_id, state)
 
     if not state:
-        return render_board(request, game_id, None)
+        return render_board(request, game_id, None, black_pov=black_pov)
 
     current_player = state["current_player"]
 
     if player_id not in state["players"].keys():
         print(f"click_square : {player_id} not in {state['players'].key()}")
-        return render_board(request, game_id, state)
+        return render_board(request, game_id, state, black_pov=black_pov)
     if player_id != current_player:
-        return render_board(request, game_id, state)
+        return render_board(request, game_id, state, black_pov=black_pov)
 
     # Premier clic -> sélection + demande coups légaux
     if selected is None:
@@ -69,7 +83,13 @@ async def click_square(
             {"game_id": game_id, "from": pos, "player": current_player},
         )
         return render_board(
-            request, game_id, state, selected=pos, legal_moves=moves, capture_probas=probas
+            request,
+            game_id,
+            state,
+            selected=pos,
+            legal_moves=moves,
+            capture_probas=probas,
+            black_pov=black_pov,
         )
 
     # Second clic + coup valide
@@ -85,18 +105,18 @@ async def click_square(
         await set_selected(game_id, player_id, None)
         await clear_moves(game_id)
         await clear_proba(game_id)
-        return render_board(request, game_id, state)
+        return render_board(request, game_id, state, black_pov=black_pov)
 
     # Second clic sur une autre pièce -> changer sélection
     if pos in state["board"]["pieces"]:
         await set_selected(game_id, player_id, pos)
         await sio.emit("get_legal_moves", {"game_id": game_id, "from": pos, "player": player_id})
-        return render_board(request, game_id, state, selected=pos)
+        return render_board(request, game_id, state, selected=pos, black_pov=black_pov)
 
     # Clic sur case vide non jouable -> clear sélection
     await set_selected(game_id, player_id, None)
     await clear_moves(game_id)
-    return render_board(request, game_id, state)
+    return render_board(request, game_id, state, black_pov=black_pov)
 
 
 @router.get("/game/{game_id}/overdrive")

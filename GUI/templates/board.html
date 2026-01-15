@@ -1,14 +1,23 @@
 {% if board %}
 
+{% if black_pov %}
+    {% set ranks = range(1, 9) %}
+    {% set files = 'hgfedcba' %}
+{% else %}
+    {% set ranks = range(8, 0, -1) %}
+    {% set files = 'abcdefgh' %}
+{% endif %}
+
 
 <div class="board"
      style="display:inline-block;border:4px solid #222;border-radius:6px;padding:6px;user-select:none">
 
-{% for r in range(8,0,-1) %}
+{% for r in ranks  %}
     <div style="display:flex">
-    {% for f in 'abcdefgh' %}
+    {% for f in files %}
         {% set pos = f ~ r %}
-        {% set square_color = '#C06DF3' if (loop.index0 + r + 1) % 2 == 0 else '#F3C06D' %}
+        {% set file_index = 'abcdefgh'.index(f) %}
+        {% set square_color = '#C06DF3' if (file_index + r) % 2 == 0 else '#F3C06D' %}
         {% set piece = board.get(pos) %}
 
         <div class="board-square"
@@ -57,5 +66,5 @@
 </div>
 
 {% else %}
-<p>En attente du moteur de jeu...</p>
+<p>En attente d'un autre joueur...</p>
 {% endif %}
